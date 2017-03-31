@@ -343,107 +343,27 @@
           "indicators": {}
         },
         {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
           "type": "WI Delegation",
-          "description": "first event.",
+          "description": "OC-2 delegated WI-202 to OC-1",
           "indicators": {}
         },
         {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
+          "src_oc_id": "2",
+          "dst_oc_id": "",
           "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
+          "type": "Work Started",
+          "description": "OC-2 started on WI-201",
           "indicators": {}
         },
         {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
+          "src_oc_id": "2",
+          "dst_oc_id": "",
           "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
-          "indicators": {}
-        },
-        {
-          "src_oc_id": "1",
-          "dst_oc_id": "2",
-          "work_item_id": "201",
-          "type": "WI Delegation",
-          "description": "first event.",
+          "type": "WI Completed",
+          "description": "OC-2 finished WI-201",
           "indicators": {}
         }
       ],
@@ -733,6 +653,22 @@
           "type": "Work Started",
           "description": "OC-2 started on WI-201",
           "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
         }
       ],
       "aggregating_indicators": {
@@ -1006,6 +942,46 @@
         }
       },
       "events": [
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
         {
           "src_oc_id": "2",
           "dst_oc_id": "1",
@@ -2132,6 +2108,46 @@
           "work_item_id": "201",
           "type": "WI Completed",
           "description": "OC-2 finished WI-201",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "2",
+          "dst_oc_id": "1",
+          "work_item_id": "202",
+          "type": "WI Delegation",
+          "description": "OC-2 delegated WI-202 to OC-1",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "1",
+          "dst_oc_id": "2",
+          "work_item_id": "201",
+          "type": "WI Delegation",
+          "description": "first event.",
+          "indicators": {}
+        },
+        {
+          "src_oc_id": "1",
+          "dst_oc_id": "2",
+          "work_item_id": "201",
+          "type": "WI Delegation",
+          "description": "first event.",
           "indicators": {}
         }
       ],

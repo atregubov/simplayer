@@ -120,12 +120,15 @@ var data = d3.json("js/data-example.json", function (error, data) {
     var wi_indicator_chart = new WI_Indicators_Chart(data, d3.select("#div_wi_indicators_chart"), d3.select("#wi_select"), d3.select("#wi_indicator_select"), d3.select("#wi_indicator_chart"));
     sim_player.addChart((wi_indicator_chart));
 
+    // OCA chart
+    var oca_chart = new OCA_Chart(data, d3.select("#oca_div"));
+    sim_player.addChart(oca_chart);
     // initiate all charts
     sim_player.initiate();
 
-    // OCA chart
-    var oca_chart = new OCA_Chart(data, d3.select("#oca_svg"));
-    oca_chart.initiate();
+    // // OCA chart
+    // var oca_chart = new OCA_Chart(data, d3.select("#oca_svg"));
+    // oca_chart.initiate();
 });
 
 

@@ -131,6 +131,7 @@ Progress_Chart.prototype.setFrame = function (n) {
  */
 function OCA_Chart(data, div_obj) {
     Base_Chart.call(this, data, div_obj);
+    this.svg_obj = this.div_obj.select("svg");
     this.current_frame = 0;
     this.oc_list = [];
     this.oc_dict = {};
@@ -142,9 +143,16 @@ function OCA_Chart(data, div_obj) {
             "name": cur_oc.name,
             "id": cur_oc.id,
             "description": cur_oc.description,
-            "index": i
-        })
-        this.oc_dict[cur_oc.id] = this.oc_list[i];
+            "index": this.oc_list.length
+        });
+        this.oc_dict[cur_oc.id] =
+            {
+                "name": cur_oc.name,
+                "id": cur_oc.id,
+                "description": cur_oc.description,
+                "index": this.oc_list.length - 1
+            };
+
     }
 
     for (var i in data.frames) {
@@ -155,11 +163,17 @@ function OCA_Chart(data, div_obj) {
             fra.push({
                 "from": cur_eve.src_oc_id,
                 "to": cur_eve.dst_oc_id,
-                "type": cur_eve.type
+                "type": cur_eve.type,
+                "description": cur_eve.description
             });
         }
         this.records.push(fra);
     }
+
+    this.names = this.oc_list.map(function (d) {
+        return d.name;
+    });
+
     if (debug) {
         console.log("OCA_Chart instantiated successfully.");
     }
@@ -167,150 +181,117 @@ function OCA_Chart(data, div_obj) {
 
 OCA_Chart.prototype.initiate = function () {
     //Returns an event handler for fading a given chord group.
-    this.fade = function (opacity) {
-        return function (d, i) {
-            svg.selectAll("path.chord")
-                .filter(function (d) {
-                    return d.source.index != i && d.target.index != i;
-                })
-                .transition()
-                .style("opacity", opacity);
-        };
-    }//fade
+    // this.fade = function (opacity) {
+    //     return function (d, i) {
+    //         svg.selectAll("path.chord")
+    //             .filter(function (d) {
+    //                 return d.source.index != i && d.target.index != i;
+    //             })
+    //             .transition()
+    //             .style("opacity", opacity);
+    //     };
+    // };//fade
     this.margin = {top: 10, right: 10, bottom: 10, left: 10};
-    this.width = parseInt(this.div_obj.style("width"));
-    this.height = parseInt(this.div_obj.style("height"));
-    this.svg_obj = this.div_obj.append("g").attr("transform", "translate(" + (this.width / 2 + this.margin.left) + ", " + (this.height / 2 + this.margin.top) + ")");
+    this.width = parseInt(this.svg_obj.style("width"));
+    this.height = parseInt(this.svg_obj.style("height"));
+    this.outerRadius = Math.min(parseInt(this.width - this.margin.left - this.margin.right), parseInt(this.height - this.margin.top - this.margin.bottom)) / 2 - 20;
+    this.innerRadius = this.outerRadius - 30;
 
-    var names = this.oc_list.map(function (d) {
-            return d.name;
-        }),
-        colors = ["#301E1E", "#083E77", "#342350", "#567235", "#8B161C", "#DF7C00"],
-        opacityDefault = 0.8;
-    names.push("test0");
-    names.push("test2");
-    names.push("test1");
-    // var matrix = [
-    //     [-1, 1, 2, 3],
-    //     [0, -1, 2, 3],
-    //     [0, 1, -1, 3],
-    //     [0, 1, 2, -1]
-    // ];
-    var matrix = [
-        [0, 1, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1, 1],
-        [1, 1, 0, 1, 1, 1],
-        [1, 1, 1, 0, 1, 1],
-        [1, 1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 0],
-    ];
+    this.centered_g = this.svg_obj.append("g").attr("transform", "translate(" + (this.width / 2) + ", " + (this.height / 2) + ")");
+    this.number_of_groups = this.names.length;
+    this.current_frame = 0;
 
-    var outerRadius = Math.min(parseInt(this.width), parseInt(this.height)) / 2 - 30,
-        innerRadius = outerRadius - 30;
+    this.chordFunc = customChord().padAngle(0.15).sortSubgroups(d3.ascending());
+    this.ribbonFunc = customRibbon().radius(this.innerRadius * 0.98).arrowRatio(0.10);
+    this.arcFunc = d3.arc()
+        .innerRadius(this.innerRadius * 1.01)
+        .outerRadius(this.outerRadius);
 
-    var chord = customChord().padAngle(0.05).sortSubgroups(d3.ascending());
+    //TODO: what if more than 20 groups?
+    this.colors = d3.schemeCategory20.slice(0, this.number_of_groups);//generateRandomColors(n);
+    this.colors = d3.scaleOrdinal().domain(d3.range(this.number_of_groups)).range(this.colors);
+    this.opacityDefault = 0.8;
 
-    var ribbon = d3.ribbon().radius(innerRadius * 0.98);
-
-    var n = matrix.length;
-    names = names.slice(0, n);
-
-    var color = d3.scaleOrdinal().domain(d3.range(n)).range(["#389c46", "#083E77", "#342350", "#8B161C", "#DF7C00", "#567235"].slice(0, n));
-    var arc = d3.arc()
-        .innerRadius(innerRadius * 1.01)
-        .outerRadius(outerRadius);
-
-    var g = this.svg_obj.append("g").datum(chord(matrix));
-
-    var group = g.append("g")
-        .attr("class", "groups")
-        .selectAll("g")
-        .data(function (chords) {
-            return chords.groups;
-        })
-        .enter().append("g");
-
-    group.append("path")
-        .style("fill", function (d) {
-            return color(d.index);
-        })
-        .style("stroke", function (d) {
-            return d3.rgb(color(d.index)).darker();
-        }).style("opacity", 0.9)
-        .attr("d", arc)
-        .attr("id", function (d, i) {
-            return "oc" + i;
-        });
-
-    // text
-    group.append("text").each(function (d) {
-        d.angle = (d.startAngle + d.endAngle) / 2;
-    }).attr("dx", 10)
-        .attr("dy", -2)
-        .append("textPath")
-        .attr("class", "titles")
-        .attr("startOffset", "25%")
-        .style("text-anchor", "middle")
-        .attr("xlink:href", function (d) {
-            return "#oc" + d.index;
-        })
-        .text(function (d, i) {
-            return names[i]
-        });
-
-    // ribbons
-    g.append("g")
-        .attr("class", "ribbons")
-        .selectAll("path")
-        .data(function (chords) {
-            return chords;
-        })
-        .enter().append("path")
-        .attr("d", ribbon)
-        .attr("marker-end", "url(#arrow)")
-        .style("fill", function (d) {
-            return color(d.target.index);
-        })
-        .style("stroke", function (d) {
-            return d3.rgb(color(d.target.index)).darker();
-        }).style("opacity", 0.3);
-
-    /*
-     this.translate = {x: this.margin.left, y: this.margin.top};
-     deltX = this.width / this.oc_list.length;
-     deltY = this.height / this.oc_list.length;
-     for (var i in this.oc_list) {
-     this.oc_list[i].x = i * deltX;
-     this.oc_list[i].y = i * deltY;
-     }
-
-     var width = parseInt(this.width) - this.margin.left - this.margin.right,
-     height = parseInt(this.height) - this.margin.top - this.margin.bottom;
-
-     // set the ranges
-     var x = d3.scalePoint().range([0, width]).domain(names);
-     var y = d3.scalePoint().range([height, 0]).domain(names);
-
-     // Add the X Axis
-     this.div_obj.append("g")
-     .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
-     .attr("class", "x axis")
-     .call(d3.axisTop(x));
-
-     // Add the Y Axis
-     this.div_obj.append("g").attr("transform", "translate(" + (this.margin.left + width) + ", " + this.margin.top + ")")
-     .attr("class", "y axis")
-     .call(d3.axisRight(y));
-     */
-
+    this.g_groups = this.centered_g.append("g").attr("class", "groups");
+    this.g_ribbons = this.centered_g.append("g").attr("class", "ribbons");
 
     this.setFrame(0);
+
     return true;
 };
 
 OCA_Chart.prototype.setFrame = function (n) {
+    var length = this.names.length;
+    var matrix = new Array(length);
+    for (var i = 0; i < length; ++i) {
+        matrix[i] = new Array(length);
+        matrix[i].fill(0);
+    }
+    var events = this.records[n];
+    for (var i in events) {
+        if (events[i].type == "WI Delegation") {
+            var cur_eve = events[i];
+            matrix[this.oc_dict[cur_eve.from].index][this.oc_dict[cur_eve.to].index] += 1;
+        }
+    }
 
+    var names = this.names;
+    var colorsFunc = this.colors;
 
+    var chords = this.chordFunc(matrix);
+
+    // TODO: add transition?
+    // var tran = d3.transition().duration(750);
+
+    var group = this.g_groups.selectAll("g").data(chords.groups);
+    var groupEnter = group.enter().append("g");
+    groupEnter.append("path")
+        .attr("class", "group-arc")
+        .style("fill", function (d) {
+            return colorsFunc(d.index);
+        })
+        .style("stroke", function (d) {
+            return d3.rgb(colorsFunc(d.index)).darker();
+        }).style("opacity", 0.9)
+        .attr("d", this.arcFunc)
+        .attr("id", function (d) {
+            return "oc" + d.index;
+        });
+    groupEnter.append("text")
+        .attr("class", "group-title")
+        .each(function (d) {
+            d.angle = (d.startAngle + d.endAngle) / 2;
+        }).attr("dx", 10)
+        .attr("dy", -2)
+        .append("textPath")
+        .attr("class", "titles")
+        .attr("startOffset", "19%")
+        .style("text-anchor", "middle")
+        .style("fill", function (d) {
+            return colorsFunc(d.index);
+        })
+        .attr("xlink:href", function (d) {
+            return "#oc" + d.index;
+        }).text(function (d, i) {
+        return names[i];
+    });
+    group.exit().remove();
+    group.select("path").attr("d", this.arcFunc);
+
+    var ribbon = this.g_ribbons.selectAll("path").data(chords);
+    ribbon.exit().remove();
+    ribbon.enter().append("path")
+        .attr("d", this.ribbonFunc)
+        .style("fill", function (d) {
+            return colorsFunc(d.source.index);
+        })
+        .style("stroke", function (d) {
+            return d3.rgb(colorsFunc(d.source.index)).darker();
+        }).style("opacity", 0.4);
+
+    ribbon.attr("d", this.ribbonFunc);
+
+    this.current_frame = n;
 };
 
 
@@ -832,13 +813,13 @@ WI_Indicators_Chart.prototype.setFrame = function (n) {
     })]);
     var newData = this.own_data[this.current_wi][this.indicators[this.current_indicator].name].slice(0, n + 1);
 
-    var svg = this.svg_obj.transition();
-    svg.select(".title").text(this.indicators[this.current_indicator].title);
-    svg.select(".y.axis").duration(this.animation_duration).call(d3.axisLeft(this.y));
-    svg.select(".line")
+    var svg_trans = this.svg_obj.transition();
+    svg_trans.select(".title").text(this.indicators[this.current_indicator].title);
+    svg_trans.select(".y.axis").duration(this.animation_duration).call(d3.axisLeft(this.y));
+    svg_trans.select(".line")
         .duration(this.animation_duration)
         .attr("d", this.valueLine(newData));
-    svg.select(".area")
+    svg_trans.select(".area")
         .duration(this.animation_duration)
         .attr("d", this.valueArea(newData));
 
@@ -855,14 +836,6 @@ WI_Indicators_Chart.prototype.setFrame = function (n) {
         return y(d);
     }).attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")").attr("class", "point");
 
-    // this.svg_obj.selectAll("circle").data(newData).enter().append("circle").attr("class", "point")
-    //     .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
-    //     .attr("r", "3.5")
-    //     .attr("cx", function (d, i) {
-    //         return x(i);
-    //     }).attr("cy", function (d) {
-    //     return y(d);
-    // }).attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     this.current_frame = n;
     return true;
@@ -899,18 +872,17 @@ var customChord = function () {
             x = 0, j = -1;
             numSeq = [];
             while (++j < n) {
-                x += matrix[i][j];
-                // if (matrix[i][j] != 0) x = x + 2;
+                // x += matrix[i][j];
+                if (i != j) x += matrix[j][i] + matrix[i][j];
             }
+            if (x == 0) x = 1;
             groupSums.push(x);
-
             for (var m = 0; m < n; m++) {
                 numSeq[m] = (n + (i - 1) - m) % n;
             }
             subgroupIndex.push(numSeq);
             k += x;
         }//while
-
 
         // Convert the sum to scaling factor for [0, 2pi].
         // TODO Allow start and end angle to be specified?
@@ -920,27 +892,58 @@ var customChord = function () {
 
         // Compute the start and end angle for each group and subgroup.
         // Note: Opera has a bug reordering object literal properties!
-        x = 0, i = -1;
+        var x = 0, i = -1;
         while (++i < n) {
-            x0 = x, j = -1;
+            var x0 = x, j = -1;
             while (++j < n) {
-                var di = groupIndex[i],
-                    dj = subgroupIndex[di][j],
-                    v = matrix[di][dj],
-                    a0 = x,
-                    a1 = x += v * k;
-                subgroups[dj * n + di] = {
+
+                var di = groupIndex[i], dj = subgroupIndex[di][j];
+                var a0 = x, a1 = x += (matrix[i][dj] > 0 ? 1 : 0) * k;
+                subgroups[i + "-" + dj + "out0"] = {
                     index: di,
                     subindex: dj,
                     startAngle: a0,
                     endAngle: a1,
-                    value: v
+                    value: matrix[i][dj] > 0 ? 1 : 0
                 };
+                var count = 0;
+                while (++count < matrix[i][dj]) {
+                    a0 = a1, a1 = x += k;
+                    subgroups[i + "-" + dj + "out" + count] = {
+                        index: di,
+                        subindex: dj,
+                        startAngle: a0,
+                        endAngle: a1,
+                        value: 1
+                    };
+                }
+
+                a0 = a1, a1 = x += (matrix[dj][i] > 0 ? 1 : 0) * k;
+                subgroups[i + "-" + dj + "in" + (matrix[dj][i] > 1 ? matrix[dj][i] - 1 : 0)] = {
+                    index: di,
+                    subindex: dj,
+                    startAngle: a0,
+                    endAngle: a1,
+                    value: matrix[dj][i] > 0 ? 1 : 0
+                };
+                count = matrix[dj][i];
+                while (--count > 0) {
+                    a0 = a1, a1 = x += k;
+                    subgroups[i + "-" + dj + "in" + (count - 1)] = {
+                        index: di,
+                        subindex: dj,
+                        startAngle: a0,
+                        endAngle: a1,
+                        value: 1
+                    }
+                }
             }
-            groups[di] = {
+            if (x0 == x) x += k;
+            groups[i] = {
                 index: di,
                 startAngle: x0,
                 endAngle: x,
+                // value:1
                 value: (x - x0) / k
             };
             x += dx;
@@ -949,17 +952,19 @@ var customChord = function () {
         // Generate chords for each (non-empty) subgroup-subgroup link.
         i = -1;
         while (++i < n) {
-            // j = i - 1;
             j = -1;
             while (++j < n) {
-                var source = subgroups[j * n + i],
-                    target = subgroups[i * n + j];
-                if (source.value || target.value) {
-                    // chords.push(source.value < target.value
-                    //     ? {source: target, target: source}
-                    //     : {source: source, target: target});
-                    chords.push({source: source, target: target});
+                if (i == j) continue;//skip self to self
+                var k = 0;
+                while (k < matrix[i][j]) {
+                    var source = subgroups[i + "-" + j + "out" + k],
+                        target = subgroups[j + "-" + i + "in" + k];
+                    if (source.value && target.value) {
+                        chords.push({source: source, target: target});
+                    }
+                    k++;
                 }
+
             }
         }
 
@@ -985,6 +990,100 @@ var customChord = function () {
     return customChord;
 };
 
+
+var customRibbon = function () {
+    var source = function (d) {
+            return d.source;
+        },
+        target = function (d) {
+            return d.target;
+        },
+        radius = function (d) {
+            return d.radius;
+        },
+        startAngle = function (d) {
+            return d.startAngle;
+        },
+        endAngle = function (d) {
+            return d.endAngle;
+        },
+        arrowRatio = function (d) {
+            return d.arrowRatio;
+        },
+        context = null;
+
+    function customRibbon() {
+        var buffer,
+            argv = Array.prototype.slice.call(arguments),
+            s = source.apply(this, argv),
+            t = target.apply(this, argv),
+            sr = +radius.apply(this, (argv[0] = s, argv)),
+            sa0 = startAngle.apply(this, argv) - Math.PI / 2,
+            sa1 = endAngle.apply(this, argv) - Math.PI / 2,
+            sx0 = sr * Math.cos(sa0),
+            sy0 = sr * Math.sin(sa0),
+            tr = +radius.apply(this, (argv[0] = t, argv)),
+            ta0 = startAngle.apply(this, argv) - Math.PI / 2,
+            ta1 = endAngle.apply(this, argv) - Math.PI / 2,
+            ratio = 1.0 - arrowRatio.apply(this, argv);
+
+        if (!context) context = buffer = d3.path();
+
+        context.moveTo(sx0, sy0);//tail
+        context.arc(0, 0, sr, sa0, sa1);
+        // context.lineTo(sr * Math.cos((sa0 + sa1) / 2) * ratio, sr * Math.sin((sa0 + sa1) / 2) * ratio);
+        // context.lineTo(sr * Math.cos(sa1), sr * Math.sin(sa1));
+        if (sa0 !== ta0 || sa1 !== ta1) { // TODO sr !== tr?
+            context.quadraticCurveTo(0, 0, tr * Math.cos((8 * ta0 + ta1) / 9) * ratio, tr * Math.sin((8 * ta0 + ta1) / 9) * ratio);
+            context.lineTo(tr * Math.cos(ta0) * ratio, tr * Math.sin(ta0) * ratio);
+            context.lineTo(tr * Math.cos((ta0 + ta1) / 2), tr * Math.sin((ta0 + ta1) / 2));
+            context.lineTo(tr * Math.cos(ta1) * ratio, tr * Math.sin(ta1) * ratio);
+            context.lineTo(tr * Math.cos((8 * ta1 + ta0) / 9) * ratio, tr * Math.sin((8 * ta1 + ta0) / 9) * ratio);
+            // context.arc(0, 0, tr * ratio, ta0, ta1);
+        }
+        context.quadraticCurveTo(0, 0, sx0, sy0);
+        context.closePath();
+
+        if (buffer) return context = null, buffer + "" || null;
+    }
+
+    constant$5 = function (x) {
+        return function () {
+            return x;
+        };
+    };
+
+    customRibbon.radius = function (_) {
+        return arguments.length ? (radius = typeof _ === "function" ? _ : constant$5(+_), customRibbon) : radius;
+    };
+
+    customRibbon.startAngle = function (_) {
+        return arguments.length ? (startAngle = typeof _ === "function" ? _ : constant$5(+_), customRibbon) : startAngle;
+    };
+
+    customRibbon.endAngle = function (_) {
+        return arguments.length ? (endAngle = typeof _ === "function" ? _ : constant$5(+_), customRibbon) : endAngle;
+    };
+
+    customRibbon.source = function (_) {
+        return arguments.length ? (source = _, customRibbon) : source;
+    };
+
+    customRibbon.target = function (_) {
+        return arguments.length ? (target = _, customRibbon) : target;
+    };
+
+    customRibbon.context = function (_) {
+        return arguments.length ? ((context = _ == null ? null : _), customRibbon) : context;
+    };
+
+    customRibbon.arrowRatio = function (_) {
+        return arguments.length ? (arrowRatio = typeof _ === "function" ? _ : constant$5(+_), customRibbon) : arrowRatio;
+    };
+
+    return customRibbon;
+};
+
 var sequence = function (start, stop, step) {
     start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
 
@@ -997,4 +1096,184 @@ var sequence = function (start, stop, step) {
     }
 
     return range;
+};
+
+var generateRandomColors = function (number) {
+    /*
+     This generates colors using the following algorithm:
+     Each time you create a color:
+     Create a random, but attractive, color{
+     Red, Green, and Blue are set to random luminosity.
+     One random value is reduced significantly to prevent grayscale.
+     Another is increased by a random amount up to 100%.
+     They are mapped to a random total luminosity in a medium-high range (bright but not white).
+     }
+     Check for similarity to other colors{
+     Check if the colors are very close together in value.
+     Check if the colors are of similar hue and saturation.
+     Check if the colors are of similar luminosity.
+     If the random color is too similar to another,
+     and there is still a good opportunity to change it:
+     Change the hue of the random color and try again.
+     }
+     Output array of all colors generated
+     */
+    //if we've passed preloaded colors and they're in hex format
+    if (typeof(arguments[1]) != 'undefined' && arguments[1].constructor == Array && arguments[1][0] && arguments[1][0].constructor != Array) {
+        for (var i = 0; i < arguments[1].length; i++) { //for all the passed colors
+            var vals = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(arguments[1][i]); //get RGB values
+            arguments[1][i] = [parseInt(vals[1], 16), parseInt(vals[2], 16), parseInt(vals[3], 16)]; //and convert them to base 10
+        }
+    }
+    var loadedColors = typeof(arguments[1]) == 'undefined' ? [] : arguments[1],//predefine colors in the set
+        number = number + loadedColors.length,//reset number to include the colors already passed
+        lastLoadedReduction = Math.floor(Math.random() * 3),//set a random value to be the first to decrease
+        rgbToHSL = function (rgb) {//converts [r,g,b] into [h,s,l]
+            var r = rgb[0], g = rgb[1], b = rgb[2], cMax = Math.max(r, g, b), cMin = Math.min(r, g, b),
+                delta = cMax - cMin, l = (cMax + cMin) / 2, h = 0, s = 0;
+            if (delta == 0) h = 0; else if (cMax == r) h = 60 * ((g - b) / delta % 6); else if (cMax == g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
+            if (delta == 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
+            return [h, s, l]
+        }, hslToRGB = function (hsl) {//converts [h,s,l] into [r,g,b]
+            var h = hsl[0], s = hsl[1], l = hsl[2], c = (1 - Math.abs(2 * l - 1)) * s,
+                x = c * (1 - Math.abs(h / 60 % 2 - 1)), m = l - c / 2, r, g, b;
+            if (h < 60) {
+                r = c;
+                g = x;
+                b = 0
+            } else if (h < 120) {
+                r = x;
+                g = c;
+                b = 0
+            } else if (h < 180) {
+                r = 0;
+                g = c;
+                b = x
+            } else if (h < 240) {
+                r = 0;
+                g = x;
+                b = c
+            } else if (h < 300) {
+                r = x;
+                g = 0;
+                b = c
+            } else {
+                r = c;
+                g = 0;
+                b = x
+            }
+            return [r, g, b]
+        }, shiftHue = function (rgb, degree) {//shifts [r,g,b] by a number of degrees
+            var hsl = rgbToHSL(rgb); //convert to hue/saturation/luminosity to modify hue
+            hsl[0] += degree; //increment the hue
+            if (hsl[0] > 360) { //if it's too high
+                hsl[0] -= 360 //decrease it mod 360
+            } else if (hsl[0] < 0) { //if it's too low
+                hsl[0] += 360 //increase it mod 360
+            }
+            return hslToRGB(hsl); //convert back to rgb
+        }, differenceRecursions = {//stores recursion data, so if all else fails we can use one of the hues already generated
+            differences: [],//used to calculate the most distant hue
+            values: []//used to store the actual colors
+        }, fixDifference = function (color) {//recursively asserts that the current color is distinctive
+            if (differenceRecursions.values.length > 23) {//first, check if this is the 25th recursion or higher. (can we try any more unique hues?)
+                //if so, get the biggest value in differences that we have and its corresponding value
+                var ret = differenceRecursions.values[differenceRecursions.differences.indexOf(Math.max.apply(null, differenceRecursions.differences))];
+                differenceRecursions = {differences: [], values: []}; //then reset the recursions array, because we're done now
+                return ret; //and then return up the recursion chain
+            } //okay, so we still have some hues to try.
+            var differences = []; //an array of the "difference" numbers we're going to generate.
+            for (var i = 0; i < loadedColors.length; i++) { //for all the colors we've generated so far
+                var difference = loadedColors[i].map(function (value, index) { //for each value (red,green,blue)
+                        return Math.abs(value - color[index]) //replace it with the difference in that value between the two colors
+                    }), sumFunction = function (sum, value) { //function for adding up arrays
+                        return sum + value
+                    }, sumDifference = difference.reduce(sumFunction), //add up the difference array
+                    loadedColorLuminosity = loadedColors[i].reduce(sumFunction), //get the total luminosity of the already generated color
+                    currentColorLuminosity = color.reduce(sumFunction), //get the total luminosity of the current color
+                    lumDifference = Math.abs(loadedColorLuminosity - currentColorLuminosity), //get the difference in luminosity between the two
+                    //how close are these two colors to being the same luminosity and saturation?
+                    differenceRange = Math.max.apply(null, difference) - Math.min.apply(null, difference),
+                    luminosityFactor = 50, //how much difference in luminosity the human eye should be able to detect easily
+                    rangeFactor = 75; //how much difference in luminosity and saturation the human eye should be able to dect easily
+                if (luminosityFactor / (lumDifference + 1) * rangeFactor / (differenceRange + 1) > 1) { //if there's a problem with range or luminosity
+                    //set the biggest difference for these colors to be whatever is most significant
+                    differences.push(Math.min(differenceRange + lumDifference, sumDifference));
+                }
+                differences.push(sumDifference); //otherwise output the raw difference in RGB values
+            }
+            var breakdownAt = 64, //if you're generating this many colors or more, don't try so hard to make unique hues, because you might fail.
+                breakdownFactor = 25, //how much should additional colors decrease the acceptable difference
+                shiftByDegrees = 15, //how many degrees of hue should we iterate through if this fails
+                acceptableDifference = 250, //how much difference is unacceptable between colors
+                breakVal = loadedColors.length / number * (number - breakdownAt), //break down progressively (if it's the second color, you can still make it a unique hue)
+                totalDifference = Math.min.apply(null, differences); //get the color closest to the current color
+            if (totalDifference > acceptableDifference - (breakVal < 0 ? 0 : breakVal) * breakdownFactor) { //if the current color is acceptable
+                differenceRecursions = {differences: [], values: []} //reset the recursions object, because we're done
+                return color; //and return that color
+            } //otherwise the current color is too much like another
+            //start by adding this recursion's data into the recursions object
+            differenceRecursions.differences.push(totalDifference);
+            differenceRecursions.values.push(color);
+            color = shiftHue(color, shiftByDegrees); //then increment the color's hue
+            return fixDifference(color); //and try again
+        }, color = function () { //generate a random color
+            var scale = function (x) { //maps [0,1] to [300,510]
+                    return x * 210 + 300 //(no brighter than #ff0 or #0ff or #f0f, but still pretty bright)
+                }, randVal = function () { //random value between 300 and 510
+                    return Math.floor(scale(Math.random()))
+                }, luminosity = randVal(), //random luminosity
+                red = randVal(), //random color values
+                green = randVal(), //these could be any random integer but we'll use the same function as for luminosity
+                blue = randVal(),
+                rescale, //we'll define this later
+                thisColor = [red, green, blue], //an array of the random values
+                /*
+                 #ff0 and #9e0 are not the same colors, but they are on the same range of the spectrum, namely without blue.
+                 Try to choose colors such that consecutive colors are on different ranges of the spectrum.
+                 This shouldn't always happen, but it should happen more often then not.
+                 Using a factor of 2.3, we'll only get the same range of spectrum 15% of the time.
+                 */
+                valueToReduce = Math.floor(lastLoadedReduction + 1 + Math.random() * 2.3) % 3, //which value to reduce
+                /*
+                 Because 300 and 510 are fairly close in reference to zero,
+                 increase one of the remaining values by some arbitrary percent betweeen 0% and 100%,
+                 so that our remaining two values can be somewhat different.
+                 */
+                valueToIncrease = Math.floor(valueToIncrease + 1 + Math.random() * 2) % 3, //which value to increase (not the one we reduced)
+                increaseBy = Math.random() + 1; //how much to increase it by
+            lastLoadedReduction = valueToReduce; //next time we make a color, try not to reduce the same one
+            thisColor[valueToReduce] = Math.floor(thisColor[valueToReduce] / 16); //reduce one of the values
+            thisColor[valueToIncrease] = Math.ceil(thisColor[valueToIncrease] * increaseBy) //increase one of the values
+            rescale = function (x) { //now, rescale the random numbers so that our output color has the luminosity we want
+                return x * luminosity / thisColor.reduce(function (a, b) {
+                        return a + b
+                    }) //sum red, green, and blue to get the total luminosity
+            };
+            thisColor = fixDifference(thisColor.map(function (a) {
+                return rescale(a)
+            })); //fix the hue so that our color is recognizable
+            if (Math.max.apply(null, thisColor) > 255) { //if any values are too large
+                rescale = function (x) { //rescale the numbers to legitimate hex values
+                    return x * 255 / Math.max.apply(null, thisColor)
+                }
+                thisColor = thisColor.map(function (a) {
+                    return rescale(a)
+                });
+            }
+            return thisColor;
+        };
+    for (var i = loadedColors.length; i < number; i++) { //Start with our predefined colors or 0, and generate the correct number of colors.
+        loadedColors.push(color().map(function (value) { //for each new color
+            return Math.round(value) //round RGB values to integers
+        }));
+    }
+    //then, after you've made all your colors, convert them to hex codes and return them.
+    return loadedColors.map(function (color) {
+        var hx = function (c) { //for each value
+            var h = c.toString(16);//then convert it to a hex code
+            return h.length < 2 ? '0' + h : h//and assert that it's two digits
+        }
+        return "#" + hx(color[0]) + hx(color[1]) + hx(color[2]); //then return the hex code
+    });
 };

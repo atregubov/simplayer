@@ -182,7 +182,7 @@ frames = [
             203: Work_Item.clone(task_c),
             204: Work_Item.clone(task_d)
         },
-        "events": [event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a, event_a],
+        "events": [event_a, event_a, event_a, event_c, event_b, event_d],
         "aggregating_indicators": {"wip": 10, "done": 2}
     }
 ];
@@ -219,7 +219,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_a, event_b],
+    "events": [event_a, event_b, event_c, event_c],
     "aggregating_indicators": {"wip": 8, "done": 4}
 });
 
@@ -255,7 +255,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_c],
+    "events": [event_c, event_c, event_c, event_c, event_c, event_c],
     "aggregating_indicators": {"wip": 4, "done": 4}
 });
 
@@ -400,7 +400,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_d, event_c, event_c, event_c, event_a, event_a],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
