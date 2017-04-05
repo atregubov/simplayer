@@ -61,46 +61,20 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">Organizational Component Activity</div>
                             <div id="oca_div" class="panel-body">
-                                <svg  style="width: 100%; height: 450px;;">
+                                <svg style="width: 100%; height: 450px;;">
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-
                     <div class="col-md-6" style="padding: 5px;">
-                        <div class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
-                            <div class="panel-heading">Event</div>
+                        <div id="oc_graph" class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
+                            <div class="panel-heading">Graphs</div>
                             <div class="panel-body">
-                                <div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">
-                                    <!--dsl content-->
-                                </div>
+                                <svg id="oc_relation_svg"></svg>
                             </div>
                         </div>
-                        <!--<div class="container" style="width: auto;">-->
-                        <!--<ul class="nav nav-tabs" style="width: auto;">-->
-                        <!--<li><a href="#org_content" data-toggle="tab">Org</a></li>-->
-                        <!--<li><a href="#cop_info_content" data-toggle="tab">Cop Info</a></li>-->
-                        <!--<li><a href="#tab_reqt_info" data-toggle="tab">Reqt Info</a></li>-->
-                        <!--<li class="active"><a href="#tab_dsl" data-toggle="tab">Event</a></li>-->
-                        <!--</ul>-->
-                        <!--<div class="tab-content" style="width: auto;">-->
-                        <!--<div class="tab-pane" id="org_content">-->
-                        <!--&lt;!&ndash;org content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane" id="cop_info_content">-->
-                        <!--&lt;!&ndash;cop info content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane" id="tab_reqt_info">-->
-                        <!--&lt;!&ndash;reqt info content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane active" id="tab_dsl">-->
-                        <!--<div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">-->
-                        <!--&lt;!&ndash;dsl content&ndash;&gt;-->
-                        <!--</div>-->
 
-                        <!--</div>-->
-                        <!--</div>-->
                     </div>
                 </div>
 
@@ -145,10 +119,38 @@
                     </div>
 
                     <div id="other_graphs" class="col-md-6" style="margin: 0px;padding: 0px 5px;">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">Graphs</div>
-                            <div class="panel-body"></div>
+                        <div class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
+                            <div class="panel-heading">Event</div>
+                            <div class="panel-body">
+                                <div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">
+                                    <!--dsl content-->
+                                </div>
+                            </div>
                         </div>
+                        <!--<div class="container" style="width: auto;">-->
+                        <!--<ul class="nav nav-tabs" style="width: auto;">-->
+                        <!--<li><a href="#org_content" data-toggle="tab">Org</a></li>-->
+                        <!--<li><a href="#cop_info_content" data-toggle="tab">Cop Info</a></li>-->
+                        <!--<li><a href="#tab_reqt_info" data-toggle="tab">Reqt Info</a></li>-->
+                        <!--<li class="active"><a href="#tab_dsl" data-toggle="tab">Event</a></li>-->
+                        <!--</ul>-->
+                        <!--<div class="tab-content" style="width: auto;">-->
+                        <!--<div class="tab-pane" id="org_content">-->
+                        <!--&lt;!&ndash;org content&ndash;&gt;-->
+                        <!--</div>-->
+                        <!--<div class="tab-pane" id="cop_info_content">-->
+                        <!--&lt;!&ndash;cop info content&ndash;&gt;-->
+                        <!--</div>-->
+                        <!--<div class="tab-pane" id="tab_reqt_info">-->
+                        <!--&lt;!&ndash;reqt info content&ndash;&gt;-->
+                        <!--</div>-->
+                        <!--<div class="tab-pane active" id="tab_dsl">-->
+                        <!--<div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">-->
+                        <!--&lt;!&ndash;dsl content&ndash;&gt;-->
+                        <!--</div>-->
+
+                        <!--</div>-->
+                        <!--</div>-->
                     </div>
                 </div>
             </div>

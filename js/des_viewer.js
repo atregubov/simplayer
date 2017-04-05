@@ -1,24 +1,24 @@
 /**
  * Created by ZiyuCheng on 2/12/17.
  */
-
 var debug = true;
 
 /*
  *  Base Chart
  */
 function Base_Chart(data, div_obj) {
+    "use strict";
     this.orginal_data = data;
     this.div_obj = div_obj;
     this.current_frame = -1;
     this.animation_duration = 0;
 }
 Base_Chart.prototype.initiate = function () {
-    alert("initiate not implemented");
+    alert("initiate not implemented. initiate()");
     return false;
 };
 Base_Chart.prototype.setFrame = function (n) {
-    alert("initiate not implemented");
+    alert("initiate not implemented. setFrame(" + n + ")");
     return false;
 };
 // Base_Chart.prototype.getFrame = function () {
@@ -37,7 +37,7 @@ function Progress_Chart(data, div_obj) {
         var frame = data.frames[i];
         for (var j in frame.work_items) {
             if (frame.work_items.hasOwnProperty(j)) {
-                if (frame.work_items[j].type == "capability") {
+                if (frame.work_items[j].type === "capability") {
                     var cur_wi = {
                         "id": frame.work_items[j].id,
                         "type": frame.work_items[j].type,
@@ -100,9 +100,9 @@ Progress_Chart.prototype.setFrame = function (n) {
     var diventer = div.enter().append("div").attr("id", function (d) {
         return d.id;
     }).attr("class", function (d) {
-        if (d.type == "capability") return "progress capability";
-        else if (d.type == "requirement") return "progress requirement";
-        else if (d.type == "task") return "progress task";
+        if (d.type === "capability") return "progress capability";
+        else if (d.type === "requirement") return "progress requirement";
+        else if (d.type === "task") return "progress task";
         else {
             console.log("unexpected work item type.");
         }
@@ -155,7 +155,7 @@ function OCA_Chart(data, div_obj) {
 
     }
 
-    for (var i in data.frames) {
+    for (i in data.frames) {
         var cur_frame = data.frames[i];
         var fra = [];
         for (var j in cur_frame.events) {
@@ -180,17 +180,6 @@ function OCA_Chart(data, div_obj) {
 }
 
 OCA_Chart.prototype.initiate = function () {
-    //Returns an event handler for fading a given chord group.
-    // this.fade = function (opacity) {
-    //     return function (d, i) {
-    //         svg.selectAll("path.chord")
-    //             .filter(function (d) {
-    //                 return d.source.index != i && d.target.index != i;
-    //             })
-    //             .transition()
-    //             .style("opacity", opacity);
-    //     };
-    // };//fade
     this.margin = {top: 10, right: 10, bottom: 10, left: 10};
     this.width = parseInt(this.svg_obj.style("width"));
     this.height = parseInt(this.svg_obj.style("height"));
@@ -228,8 +217,8 @@ OCA_Chart.prototype.setFrame = function (n) {
         matrix[i].fill(0);
     }
     var events = this.records[n];
-    for (var i in events) {
-        if (events[i].type == "WI Delegation") {
+    for (i in events) {
+        if (events[i].type === "WI Delegation") {
             var cur_eve = events[i];
             matrix[this.oc_dict[cur_eve.from].index][this.oc_dict[cur_eve.to].index] += 1;
         }
@@ -289,7 +278,12 @@ OCA_Chart.prototype.setFrame = function (n) {
             return d3.rgb(colorsFunc(d.source.index)).darker();
         }).style("opacity", 0.4);
 
-    ribbon.attr("d", this.ribbonFunc);
+    ribbon.attr("d", this.ribbonFunc).style("fill", function (d) {
+        return colorsFunc(d.source.index);
+    })
+        .style("stroke", function (d) {
+            return d3.rgb(colorsFunc(d.source.index)).darker();
+        });
 
     this.current_frame = n;
 };
@@ -548,7 +542,7 @@ OC_Indicators_Chart.prototype.initiate = function () {
     var target = this;
     for (var i in this.own_data) {
         this.wi_selector.append("option").text(this.own_data[i].name).attr("value", this.own_data[i].id).property("selected", function () {
-            return this.value == target.current_oc;
+            return (this.value === target.current_oc);
         });
     }
     this.wi_selector.on("change", function () {
@@ -556,9 +550,9 @@ OC_Indicators_Chart.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    for (var i in this.indicators) {
+    for (i in this.indicators) {
         this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
-            return i == target.current_indicator;
+            return i === target.current_indicator;
         });
     }
     this.indicator_selector.on("change", function () {
@@ -717,7 +711,7 @@ WI_Indicators_Chart.prototype.initiate = function () {
     var target = this;
     for (var i in this.own_data) {
         this.wi_selector.append("option").text(this.own_data[i].name).attr("value", this.own_data[i].id).property("selected", function () {
-            return this.value == target.current_wi;
+            return this.value === target.current_wi;
         });
     }
     this.wi_selector.on("change", function () {
@@ -725,9 +719,9 @@ WI_Indicators_Chart.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    for (var i in this.indicators) {
+    for (i in this.indicators) {
         this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
-            return parseInt(i) == target.current_indicator;
+            return parseInt(i) === target.current_indicator;
         });
     }
     this.indicator_selector.on("change", function () {
@@ -807,7 +801,6 @@ WI_Indicators_Chart.prototype.initiate = function () {
 
 WI_Indicators_Chart.prototype.setFrame = function (n) {
     if (n < 0 || n >= this.own_data[this.current_wi][this.indicators[this.current_indicator].name].length) return false;
-    var target = this;
     this.y.domain([0, d3.max(this.own_data[this.current_wi][this.indicators[this.current_indicator].name], function (d) {
         return d;
     })]);
@@ -841,6 +834,14 @@ WI_Indicators_Chart.prototype.setFrame = function (n) {
     return true;
 };
 
+function OrganizationRelationChart(data, div_obj){
+    "use strict";
+    Base_Chart.call(this, data, div_obj);
+    this.own_data = [];
+
+
+}
+
 /*********** Util ***********/
 
 var customChord = function () {
@@ -873,9 +874,9 @@ var customChord = function () {
             numSeq = [];
             while (++j < n) {
                 // x += matrix[i][j];
-                if (i != j) x += matrix[j][i] + matrix[i][j];
+                if (i !== j) x += matrix[j][i] + matrix[i][j];
             }
-            if (x == 0) x = 1;
+            if (x === 0) x = 1;
             groupSums.push(x);
             for (var m = 0; m < n; m++) {
                 numSeq[m] = (n + (i - 1) - m) % n;
@@ -884,21 +885,15 @@ var customChord = function () {
             k += x;
         }//while
 
-        // Convert the sum to scaling factor for [0, 2pi].
-        // TODO Allow start and end angle to be specified?
-        // TODO Allow padding to be specified as percentage?
-        k = Math.max(0, Math.PI * 2 - padAngle * n) / k;
-        dx = k ? padAngle : Math.PI * 2 / n;
-
-        // Compute the start and end angle for each group and subgroup.
-        // Note: Opera has a bug reordering object literal properties!
-        var x = 0, i = -1;
+        dx = n > 1 && padAngle ? padAngle : Math.PI * 2 / n;
+        k = Math.max(0, Math.PI * 2 - padAngle * n) / n;
+        x = 0, i = -1;
         while (++i < n) {
-            var x0 = x, j = -1;
+            x0 = x, j = -1;
+            var sub_k = k / groupSums[i];
             while (++j < n) {
-
                 var di = groupIndex[i], dj = subgroupIndex[di][j];
-                var a0 = x, a1 = x += (matrix[i][dj] > 0 ? 1 : 0) * k;
+                var a0 = x, a1 = x += (matrix[i][dj] > 0 ? 1 : 0) * sub_k;
                 subgroups[i + "-" + dj + "out0"] = {
                     index: di,
                     subindex: dj,
@@ -908,7 +903,7 @@ var customChord = function () {
                 };
                 var count = 0;
                 while (++count < matrix[i][dj]) {
-                    a0 = a1, a1 = x += k;
+                    a0 = a1, a1 = x += sub_k;
                     subgroups[i + "-" + dj + "out" + count] = {
                         index: di,
                         subindex: dj,
@@ -918,7 +913,7 @@ var customChord = function () {
                     };
                 }
 
-                a0 = a1, a1 = x += (matrix[dj][i] > 0 ? 1 : 0) * k;
+                a0 = a1, a1 = x += (matrix[dj][i] > 0 ? 1 : 0) * sub_k;
                 subgroups[i + "-" + dj + "in" + (matrix[dj][i] > 1 ? matrix[dj][i] - 1 : 0)] = {
                     index: di,
                     subindex: dj,
@@ -928,7 +923,7 @@ var customChord = function () {
                 };
                 count = matrix[dj][i];
                 while (--count > 0) {
-                    a0 = a1, a1 = x += k;
+                    a0 = a1, a1 = x += sub_k;
                     subgroups[i + "-" + dj + "in" + (count - 1)] = {
                         index: di,
                         subindex: dj,
@@ -938,15 +933,8 @@ var customChord = function () {
                     }
                 }
             }
-            if (x0 == x) x += k;
-            groups[i] = {
-                index: di,
-                startAngle: x0,
-                endAngle: x,
-                // value:1
-                value: (x - x0) / k
-            };
-            x += dx;
+            groups[i] = {index: i, startAngle: x0, endAngle: x0 += k, value: k};
+            x = x0 + dx;
         }
 
         // Generate chords for each (non-empty) subgroup-subgroup link.
@@ -954,8 +942,8 @@ var customChord = function () {
         while (++i < n) {
             j = -1;
             while (++j < n) {
-                if (i == j) continue;//skip self to self
-                var k = 0;
+                if (i === j) continue;//skip self to self
+                k = 0;
                 while (k < matrix[i][j]) {
                     var source = subgroups[i + "-" + j + "out" + k],
                         target = subgroups[j + "-" + i + "in" + k];
@@ -984,11 +972,13 @@ var customChord = function () {
     };
 
     customChord.sortChords = function (_) {
-        return arguments.length ? (_ == null ? sortChords = null : (sortChords = compareValue(_))._ = _, customChord) : sortChords && sortChords._;
+        return arguments.length ? (_ === null ? sortChords = null : (sortChords = compareValue(_))._ = _, customChord) : sortChords && sortChords._;
     };
 
     return customChord;
 };
+
+
 
 
 var customRibbon = function () {
@@ -1066,15 +1056,15 @@ var customRibbon = function () {
     };
 
     customRibbon.source = function (_) {
-        return arguments.length ? (source = _, customRibbon) : source;
+        return arguments.length ? (source = _ , customRibbon) : source;
     };
 
     customRibbon.target = function (_) {
-        return arguments.length ? (target = _, customRibbon) : target;
+        return arguments.length ? (target = _ , customRibbon) : target;
     };
 
     customRibbon.context = function (_) {
-        return arguments.length ? ((context = _ == null ? null : _), customRibbon) : context;
+        return arguments.length ? ((context = _ === null ? null : _), customRibbon) : context;
     };
 
     customRibbon.arrowRatio = function (_) {
@@ -1119,7 +1109,7 @@ var generateRandomColors = function (number) {
      Output array of all colors generated
      */
     //if we've passed preloaded colors and they're in hex format
-    if (typeof(arguments[1]) != 'undefined' && arguments[1].constructor == Array && arguments[1][0] && arguments[1][0].constructor != Array) {
+    if (typeof(arguments[1]) !== 'undefined' && arguments[1].constructor === Array && arguments[1][0] && arguments[1][0].constructor !== Array) {
         for (var i = 0; i < arguments[1].length; i++) { //for all the passed colors
             var vals = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(arguments[1][i]); //get RGB values
             arguments[1][i] = [parseInt(vals[1], 16), parseInt(vals[2], 16), parseInt(vals[3], 16)]; //and convert them to base 10
@@ -1131,8 +1121,8 @@ var generateRandomColors = function (number) {
         rgbToHSL = function (rgb) {//converts [r,g,b] into [h,s,l]
             var r = rgb[0], g = rgb[1], b = rgb[2], cMax = Math.max(r, g, b), cMin = Math.min(r, g, b),
                 delta = cMax - cMin, l = (cMax + cMin) / 2, h = 0, s = 0;
-            if (delta == 0) h = 0; else if (cMax == r) h = 60 * ((g - b) / delta % 6); else if (cMax == g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
-            if (delta == 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
+            if (delta === 0) h = 0; else if (cMax === r) h = 60 * ((g - b) / delta % 6); else if (cMax === g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
+            if (delta === 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
             return [h, s, l]
         }, hslToRGB = function (hsl) {//converts [h,s,l] into [r,g,b]
             var h = hsl[0], s = hsl[1], l = hsl[2], c = (1 - Math.abs(2 * l - 1)) * s,
@@ -1244,7 +1234,7 @@ var generateRandomColors = function (number) {
                 increaseBy = Math.random() + 1; //how much to increase it by
             lastLoadedReduction = valueToReduce; //next time we make a color, try not to reduce the same one
             thisColor[valueToReduce] = Math.floor(thisColor[valueToReduce] / 16); //reduce one of the values
-            thisColor[valueToIncrease] = Math.ceil(thisColor[valueToIncrease] * increaseBy) //increase one of the values
+            thisColor[valueToIncrease] = Math.ceil(thisColor[valueToIncrease] * increaseBy); //increase one of the values
             rescale = function (x) { //now, rescale the random numbers so that our output color has the luminosity we want
                 return x * luminosity / thisColor.reduce(function (a, b) {
                         return a + b
@@ -1256,14 +1246,14 @@ var generateRandomColors = function (number) {
             if (Math.max.apply(null, thisColor) > 255) { //if any values are too large
                 rescale = function (x) { //rescale the numbers to legitimate hex values
                     return x * 255 / Math.max.apply(null, thisColor)
-                }
+                };
                 thisColor = thisColor.map(function (a) {
                     return rescale(a)
                 });
             }
             return thisColor;
         };
-    for (var i = loadedColors.length; i < number; i++) { //Start with our predefined colors or 0, and generate the correct number of colors.
+    for (i = loadedColors.length; i < number; i++) { //Start with our predefined colors or 0, and generate the correct number of colors.
         loadedColors.push(color().map(function (value) { //for each new color
             return Math.round(value) //round RGB values to integers
         }));
@@ -1273,7 +1263,7 @@ var generateRandomColors = function (number) {
         var hx = function (c) { //for each value
             var h = c.toString(16);//then convert it to a hex code
             return h.length < 2 ? '0' + h : h//and assert that it's two digits
-        }
+        };
         return "#" + hx(color[0]) + hx(color[1]) + hx(color[2]); //then return the hex code
     });
 };

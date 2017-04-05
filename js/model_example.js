@@ -144,10 +144,16 @@ oc_a.working_queue.push(202);
 oc_b.accepted_queue.push(203);
 oc_c.external_queue.push(204);
 
-var event_a = Work_Event.create("1", "2", "201", "WI Delegation", "first event.", {});
-var event_b = Work_Event.create("2", "", "201", "Work Started", "OC-2 started on WI-201", {});
-var event_c = Work_Event.create("2", "1", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
-var event_d = Work_Event.create("2", "", "201", "WI Completed", "OC-2 finished WI-201", {});
+var event_1_2 = Work_Event.create("1", "2", "201", "WI Delegation", "first event.", {});
+var event_2 = Work_Event.create("2", "", "201", "Work Started", "OC-2 started on WI-201", {});
+var event_2_1 = Work_Event.create("2", "1", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
+var event_1 = Work_Event.create("1", "", "201", "WI Completed", "OC-2 finished WI-201", {});
+var event_3 = Work_Event.create("3", "", "201", "WI Completed", "OC-2 finished WI-201", {});
+var event_1_3 = Work_Event.create("1", "3", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
+var event_3_1 = Work_Event.create("3", "1", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
+var event_2_3 = Work_Event.create("2", "3", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
+var event_3_2 = Work_Event.create("3", "2", "202", "WI Delegation", "OC-2 delegated WI-202 to OC-1", {});
+
 
 /************************ Frame 0 ************************/
 oc_a.indicators = {"wip": 4, "done": 0, "work load": 4};
@@ -182,7 +188,7 @@ frames = [
             203: Work_Item.clone(task_c),
             204: Work_Item.clone(task_d)
         },
-        "events": [event_a, event_a, event_a, event_c, event_b, event_d],
+        "events": [event_1_2, event_1_2, event_1_2, event_2_1, event_2, event_1],
         "aggregating_indicators": {"wip": 10, "done": 2}
     }
 ];
@@ -219,7 +225,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_a, event_b, event_c, event_c],
+    "events": [event_3_1, event_3_1, event_1_3, event_1_2, event_2_1],
     "aggregating_indicators": {"wip": 8, "done": 4}
 });
 
@@ -255,7 +261,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_c, event_c, event_c, event_c, event_c, event_c],
+    "events": [event_2_1, event_2_1, event_2_1, event_2_1, event_2_1, event_2_1, event_3_1, event_3_1, event_3_1],
     "aggregating_indicators": {"wip": 4, "done": 4}
 });
 
@@ -292,7 +298,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_1],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -328,7 +334,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_1],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -364,7 +370,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_1, event_1_2, event_1_3, event_1_2, event_1_3],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -400,7 +406,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d, event_c, event_c, event_c, event_a, event_a],
+    "events": [event_1, event_2_1, event_2_1, event_2_1, event_1_2, event_1_2],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -436,7 +442,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_1, event_2, event_3, event_1_2, event_1_3, event_2_1, event_2_3, event_3_2, event_3_1],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -472,7 +478,7 @@ frames.push({
         203: Work_Item.clone(task_c),
         204: Work_Item.clone(task_d)
     },
-    "events": [event_d],
+    "events": [event_1],
     "aggregating_indicators": {"wip": 7, "done": 15}
 });
 
@@ -486,6 +492,79 @@ oc_dictionary = [
     {"name": "wip", "x": "Time", "y": "#", "title": "Work Item In Progress"},
     {"name": "done", "x": "Time", "y": "#", "title": "Completed Work Items"},
     {"name": "work load", "x": "Time", "y": "Load", "title": "Work Load"}
+];
+
+oc_model = [
+    {
+        "oc_id": 101,
+        "name": "SE Team",
+        "children_ids": [
+            111,
+            112
+        ]
+    },
+    {
+        "oc_id": 102,
+        "name": "Security Team",
+        "children_ids": [
+            113,
+            114
+        ]
+    },
+    {
+        "oc_id": 111,
+        "name": "Team-111",
+        "children_ids": [
+            121
+        ]
+    },
+    {
+        "oc_id": 112,
+        "name": "Team-112",
+        "children_ids": [
+            121, 122
+        ]
+    },
+    {
+        "oc_id": 113,
+        "name": "Team-113",
+        "children_ids": [
+            122
+        ]
+    },
+    {
+        "oc_id": 114,
+        "name": "Team-114",
+        "children_ids": [
+            122
+        ]
+    },
+    {
+        "oc_id": 121,
+        "name": "Team-121",
+        "children_ids": [
+            131
+        ]
+    },
+    {
+        "oc_id": 122,
+        "name": "Team-122",
+        "children_ids": [
+            131
+        ]
+    },
+    {
+        "oc_id": 131,
+        "name": "Team-131",
+        "children_ids": [
+            141
+        ]
+    },
+    {
+        "oc_id": 141,
+        "name": "Team-141",
+        "children_ids": []
+    }
 ];
 
 work_item_dictionary = [
@@ -503,6 +582,7 @@ frame_dictionary = [
 data = {
     "basic_info": basic_info,
     "oc_dictionary": oc_dictionary,
+    "oc_model": oc_model,
     "work_item_dictionary": work_item_dictionary,
     "event_dictionary": event_dictionary,
     "frame_dictionary": frame_dictionary,
