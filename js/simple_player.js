@@ -103,8 +103,6 @@ var data = d3.json("js/data-example.json", function (error, data) {
     sim_player.addChart(progress_chart);
 
 
-
-
     // DSL chart
     var dsl_chart = new DSL_Chart(data, d3.select("#dsl_content"));
     sim_player.addChart(dsl_chart);
@@ -123,12 +121,14 @@ var data = d3.json("js/data-example.json", function (error, data) {
     // OCA chart
     var oca_chart = new OCA_Chart(data, d3.select("#oca_div"));
     sim_player.addChart(oca_chart);
+
+    // OC Organizational Relation Chart
+    var orc_chart = new OrganizationRelationChart(data, d3.select("#oc_graph"), d3.select("#oc_relation_svg"));
+    sim_player.addChart(orc_chart);
+
     // initiate all charts
     sim_player.initiate();
 
-    // // OCA chart
-    // var oca_chart = new OCA_Chart(data, d3.select("#oca_svg"));
-    // oca_chart.initiate();
 });
 
 

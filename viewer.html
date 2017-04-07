@@ -71,7 +71,7 @@
                         <div id="oc_graph" class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
                             <div class="panel-heading">Graphs</div>
                             <div class="panel-body">
-                                <svg id="oc_relation_svg"></svg>
+                                <svg id="oc_relation_svg" style="height: 450px; width: 350px;"></svg>
                             </div>
                         </div>
 
@@ -86,31 +86,34 @@
                                 <div class="panel-heading">Cumulative Flow Diagrams</div>
                                 <ul class="list-group">
                                     <li class="list-group-item">
-                                        <div id="div_agg_indicators" style="height: 200px;">
-                                            <select id="agg_select" size="10"
-                                                    style="width: 80px; height:200px; float: left;">
+                                        <div id="div_agg_indicators" style="height: 200px;display: flex;">
+                                            <select id="agg_select" multiple="multiple" size="10"
+                                            style="width: 80px; height:200px; float: left;">
                                             </select>
-                                            <svg id="agg_chart" style="height: 200px;"></svg>
+                                            <svg id="agg_chart" style="flex-grow: 1;"></svg>
+
                                         </div>
                                     </li>
                                     <li class="list-group-item">
-                                        <div id="div_oc_indicators_chart" style="height: 200px;">
-                                            <select id="oc_select" size="10"
+                                        <div id="div_oc_indicators_chart" style="height: 200px;display: flex;">
+                                            <select id="oc_select" multiple="multiple" size="10"
                                                     style="width: 80px; height:200px; float: left;">
                                             </select>
-                                            <select id="oc_indicator_select" style="width: 80px; float: right;">
+                                            <select id="oc_indicator_select"
+                                                    style="width: 90px; position: absolute; right: 5px;">
                                             </select>
-                                            <svg id="oc_indicator_chart" style="height: 180px"></svg>
+                                            <svg id="oc_indicator_chart" style="flex-grow: 1;"></svg>
                                         </div>
                                     </li>
                                     <li class="list-group-item">
-                                        <div id="div_wi_indicators" style="height: 200px;">
-                                            <select id="wi_select" size="10"
+                                        <div id="div_wi_indicators" style="height: 200px;display: flex;">
+                                            <select id="wi_select" multiple="multiple" size="10"
                                                     style="width: 80px; height:200px; float: left;">
                                             </select>
-                                            <select id="wi_indicator_select" style="width: 80px; float: right;">
+                                            <select id="wi_indicator_select"
+                                                    style="width: 90px; position: absolute; right: 5px;">
                                             </select>
-                                            <svg id="wi_indicator_chart" style="height: 180px"></svg>
+                                            <svg id="wi_indicator_chart" style="flex-grow: 1;"></svg>
                                         </div>
                                     </li>
                                 </ul>

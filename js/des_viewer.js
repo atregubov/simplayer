@@ -7,8 +7,7 @@ var debug = true;
  *  Base Chart
  */
 function Base_Chart(data, div_obj) {
-    "use strict";
-    this.orginal_data = data;
+    this.original_data = data;
     this.div_obj = div_obj;
     this.current_frame = -1;
     this.animation_duration = 0;
@@ -84,6 +83,8 @@ function Progress_Chart(data, div_obj) {
     }
 }
 
+Progress_Chart.prototype = new Base_Chart();
+
 Progress_Chart.prototype.initiate = function () {
     this.setFrame(0);
     return true;
@@ -97,7 +98,7 @@ Progress_Chart.prototype.setFrame = function (n) {
     //noinspection JSUnresolvedFunction
     var div = this.div_obj.selectAll("div").data(frame_data);
 
-    var diventer = div.enter().append("div").attr("id", function (d) {
+    var divEnter = div.enter().append("div").attr("id", function (d) {
         return d.id;
     }).attr("class", function (d) {
         if (d.type === "capability") return "progress capability";
@@ -108,19 +109,19 @@ Progress_Chart.prototype.setFrame = function (n) {
         }
     });
 
-    var a = diventer.append("div").attr("class", "progress-bar progress-bar-info progress-bar-striped active").style("width", function (d) {
+    var a = divEnter.append("div").attr("class", "progress-bar progress-bar-info progress-bar-striped active").style("width", function (d) {
         return d.completeness * 100 + "%";
     }).attr("roll", "progressbar").attr("aria-valuenow", "45").attr("aria-valuemin", "0").attr("aria-valuemax", "100");
     a.exit().remove();
-    diventer.append("span").attr("class", "progress-bar-name").text(function (d) {
+    divEnter.append("span").attr("class", "progress-bar-name").text(function (d) {
         return d.name
     });
 
-    diventer.append("span").attr("class", "progress-bar-percent").text(function (d) {
+    divEnter.append("span").attr("class", "progress-bar-percent").text(function (d) {
         return (d.completeness * 100).toFixed(2) + "%";
     });
 
-    diventer.exit().remove();
+    divEnter.exit().remove();
 
     this.current_frame = n;
     return true;
@@ -178,6 +179,8 @@ function OCA_Chart(data, div_obj) {
         console.log("OCA_Chart instantiated successfully.");
     }
 }
+
+OCA_Chart.prototype = new Base_Chart();
 
 OCA_Chart.prototype.initiate = function () {
     this.margin = {top: 10, right: 10, bottom: 10, left: 10};
@@ -319,6 +322,8 @@ function DSL_Chart(data, div_obj) {
     }
 }
 
+DSL_Chart.prototype = new Base_Chart();
+
 DSL_Chart.prototype.initiate = function () {
     this.setFrame(0);
     return true;
@@ -372,13 +377,15 @@ function Aggregating_Indicators(data, div_obj, agg_select, svg_obj) {
     }
 }
 
+Aggregating_Indicators.prototype = new Base_Chart();
+
 Aggregating_Indicators.prototype.initiate = function () {
     this.current_frame = 0;
     var target = this;
     for (var i in this.indicators) {
         //noinspection JSUnfilteredForInLoop
         this.agg_select.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
-            return target.current_indicator == this.value;
+            return target.current_indicator === this.value;
         });
     }
 
@@ -388,7 +395,7 @@ Aggregating_Indicators.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    var width = parseInt(this.width) - this.margin.left - this.margin.right,
+    var width  = parseInt(this.width) - this.margin.left - this.margin.right,
         height = parseInt(this.height) - this.margin.top - this.margin.bottom;
 
     // set the ranges
@@ -538,6 +545,8 @@ function OC_Indicators_Chart(data, div_obj, oc_selector, indicator_selector, svg
     }
 }
 
+OC_Indicators_Chart.prototype = new Base_Chart();
+
 OC_Indicators_Chart.prototype.initiate = function () {
     var target = this;
     for (var i in this.own_data) {
@@ -551,9 +560,9 @@ OC_Indicators_Chart.prototype.initiate = function () {
     });
 
     for (i in this.indicators) {
-        this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
+        this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", (function () {
             return i === target.current_indicator;
-        });
+        })());
     }
     this.indicator_selector.on("change", function () {
         // target.current_indicator = this.options[this.selectedIndex].value;
@@ -561,7 +570,7 @@ OC_Indicators_Chart.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    var width = parseInt(this.width) - this.margin.left - this.margin.right,
+    var width  = parseInt(this.width) - this.margin.left - this.margin.right,
         height = parseInt(this.height) - this.margin.top - this.margin.bottom;
 
     // set the ranges
@@ -707,6 +716,8 @@ function WI_Indicators_Chart(data, div_obj, wi_selector, indicator_selector, svg
     }
 }
 
+WI_Indicators_Chartprototype = new Base_Chart();
+
 WI_Indicators_Chart.prototype.initiate = function () {
     var target = this;
     for (var i in this.own_data) {
@@ -729,7 +740,7 @@ WI_Indicators_Chart.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    var width = parseInt(this.width) - this.margin.left - this.margin.right,
+    var width  = parseInt(this.width) - this.margin.left - this.margin.right,
         height = parseInt(this.height) - this.margin.top - this.margin.bottom;
 
     // set the ranges
@@ -834,29 +845,125 @@ WI_Indicators_Chart.prototype.setFrame = function (n) {
     return true;
 };
 
-function OrganizationRelationChart(data, div_obj){
-    "use strict";
+function OrganizationRelationChart(data, div_obj, svg_obj) {
     Base_Chart.call(this, data, div_obj);
-    this.own_data = [];
-
-
+    this.svg_obj = svg_obj;
+    this.own_data = this.original_data.oc_model;
 }
+
+OrganizationRelationChart.prototype = new Base_Chart();
+
+OrganizationRelationChart.prototype.initiate = function () {
+    this.height = parseInt(this.svg_obj.style("height"));
+    this.width = parseInt(this.svg_obj.style("width"));
+    this.margin = {top: 25, right: 5, bottom: 25, left: 5};
+
+    var dict = {};
+    var head_id = {};
+    for (var o in this.own_data) {
+        dict[this.own_data[o].oc_id] = this.own_data[o];
+        head_id[this.own_data[o].oc_id] = true;
+    }
+
+    for (o in dict) {
+        for (var c in dict[o].children_ids) {
+            delete head_id[dict[o].children_ids[c]];
+        }
+    }
+
+    var collect_structure = function (node) {
+        var cur_node = {"oc_id": node.oc_id, "name": node.name, "children": []};
+        for (var key in node.children_ids) {
+            cur_node.children.push(collect_structure(dict[node.children_ids[key]]));
+        }
+        return cur_node;
+    };
+    head_id = Object.keys(head_id);
+    // var treeData = collect_structure({"name": "root", "oc_id": "root", "children_ids": head_id});
+    var treeData = collect_structure(dict[head_id]);
+    // declares a tree layout and assigns the size
+    var treeMap = d3.tree().size([this.width - this.margin.left - this.margin.right, this.height - this.margin.top - this.margin.bottom]);
+
+    // assigns the data to a hierarchy using parent-child relationships
+    var nodes = d3.hierarchy(treeData);
+
+    // maps the node data to the tree layout
+    nodes = treeMap(nodes);
+
+    // appends a 'group' element to 'svg'
+    // moves the 'group' element to the top left margin
+    g = this.svg_obj.append("g")
+        .attr("transform",
+            "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+    // adds the links between the nodes
+    var link = g.selectAll(".link")
+        .data(nodes.descendants().slice(1))
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", function (d) {
+            return "M" + d.x + "," + d.y
+                + "C" + d.x + "," + (d.y + d.parent.y) / 2
+                + " " + d.parent.x + "," + (d.y + d.parent.y) / 2
+                + " " + d.parent.x + "," + d.parent.y;
+        });
+
+    // adds each node as a group
+    var node = g.selectAll(".node")
+        .data(nodes.descendants())
+        .enter().append("g")
+        .attr("class", function (d) {
+            return "node" +
+                (d.children ? " node--internal" : " node--leaf");
+        })
+        .attr("transform", function (d) {
+            return "translate(" + d.x + "," + d.y + ")";
+        });
+
+    // adds the circle to the node
+    node.append("circle")
+        .attr("r", 10);
+
+    // adds the text to the node
+    node.append("text")
+        .attr("dy", ".35em")
+        .attr("y", function (d) {
+            return d.children ? -20 : 20;
+        })
+        .style("text-anchor", "middle")
+        .text(function (d) {
+            return d.data.name;
+        });
+
+    // node.each(function(d){
+    //     if (d.name == "flare")
+    //         d3.select(this).remove();});
+    // link.each(function(d){
+    //     if (d.source.name == "flare")
+    //         d3.select(this).remove();});
+    return true;
+};
+
+OrganizationRelationChart.prototype.setFrame = function (n) {
+    this.current_frame = n;
+    return true;
+};
 
 /*********** Util ***********/
 
 var customChord = function () {
-    var padAngle = 0,
-        sortGroups = null,
+    var padAngle      = 0,
+        sortGroups    = null,
         sortSubgroups = null,
-        sortChords = null;
+        sortChords    = null;
 
     function customChord(matrix) {
-        var n = matrix.length,
-            groupSums = [],
-            groupIndex = sequence(n),
+        var n             = matrix.length,
+            groupSums     = [],
+            groupIndex    = sequence(n),
             subgroupIndex = [],
-            chords = [],
-            groups = chords.groups = new Array(n),
+            chords        = [],
+            groups        = chords.groups = new Array(n),
             subgroups = new Array(n * n),
             k,
             x,
@@ -979,42 +1086,40 @@ var customChord = function () {
 };
 
 
-
-
 var customRibbon = function () {
-    var source = function (d) {
+    var source     = function (d) {
             return d.source;
         },
-        target = function (d) {
+        target     = function (d) {
             return d.target;
         },
-        radius = function (d) {
+        radius     = function (d) {
             return d.radius;
         },
         startAngle = function (d) {
             return d.startAngle;
         },
-        endAngle = function (d) {
+        endAngle   = function (d) {
             return d.endAngle;
         },
         arrowRatio = function (d) {
             return d.arrowRatio;
         },
-        context = null;
+        context    = null;
 
     function customRibbon() {
         var buffer,
             argv = Array.prototype.slice.call(arguments),
-            s = source.apply(this, argv),
-            t = target.apply(this, argv),
-            sr = +radius.apply(this, (argv[0] = s, argv)),
+            s    = source.apply(this, argv),
+            t    = target.apply(this, argv),
+            sr   = +radius.apply(this, (argv[0] = s, argv)),
             sa0 = startAngle.apply(this, argv) - Math.PI / 2,
             sa1 = endAngle.apply(this, argv) - Math.PI / 2,
             sx0 = sr * Math.cos(sa0),
             sy0 = sr * Math.sin(sa0),
-            tr = +radius.apply(this, (argv[0] = t, argv)),
-            ta0 = startAngle.apply(this, argv) - Math.PI / 2,
-            ta1 = endAngle.apply(this, argv) - Math.PI / 2,
+            tr  = +radius.apply(this, (argv[0] = t, argv)),
+            ta0   = startAngle.apply(this, argv) - Math.PI / 2,
+            ta1   = endAngle.apply(this, argv) - Math.PI / 2,
             ratio = 1.0 - arrowRatio.apply(this, argv);
 
         if (!context) context = buffer = d3.path();
@@ -1077,8 +1182,8 @@ var customRibbon = function () {
 var sequence = function (start, stop, step) {
     start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
 
-    var i = -1,
-        n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
+    var i     = -1,
+        n     = Math.max(0, Math.ceil((stop - start) / step)) | 0,
         range = new Array(n);
 
     while (++i < n) {
@@ -1115,18 +1220,18 @@ var generateRandomColors = function (number) {
             arguments[1][i] = [parseInt(vals[1], 16), parseInt(vals[2], 16), parseInt(vals[3], 16)]; //and convert them to base 10
         }
     }
-    var loadedColors = typeof(arguments[1]) == 'undefined' ? [] : arguments[1],//predefine colors in the set
-        number = number + loadedColors.length,//reset number to include the colors already passed
-        lastLoadedReduction = Math.floor(Math.random() * 3),//set a random value to be the first to decrease
-        rgbToHSL = function (rgb) {//converts [r,g,b] into [h,s,l]
+    var loadedColors            = typeof(arguments[1]) === 'undefined' ? [] : arguments[1],//predefine colors in the set
+        number                  = number + loadedColors.length,//reset number to include the colors already passed
+        lastLoadedReduction     = Math.floor(Math.random() * 3),//set a random value to be the first to decrease
+        rgbToHSL                = function (rgb) {//converts [r,g,b] into [h,s,l]
             var r = rgb[0], g = rgb[1], b = rgb[2], cMax = Math.max(r, g, b), cMin = Math.min(r, g, b),
-                delta = cMax - cMin, l = (cMax + cMin) / 2, h = 0, s = 0;
+                delta                                                              = cMax - cMin, l = (cMax + cMin) / 2, h = 0, s = 0;
             if (delta === 0) h = 0; else if (cMax === r) h = 60 * ((g - b) / delta % 6); else if (cMax === g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
             if (delta === 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
             return [h, s, l]
-        }, hslToRGB = function (hsl) {//converts [h,s,l] into [r,g,b]
+        }, hslToRGB             = function (hsl) {//converts [h,s,l] into [r,g,b]
             var h = hsl[0], s = hsl[1], l = hsl[2], c = (1 - Math.abs(2 * l - 1)) * s,
-                x = c * (1 - Math.abs(h / 60 % 2 - 1)), m = l - c / 2, r, g, b;
+                x                                     = c * (1 - Math.abs(h / 60 % 2 - 1));//, m = l - c / 2, r, g, b;
             if (h < 60) {
                 r = c;
                 g = x;
@@ -1153,7 +1258,7 @@ var generateRandomColors = function (number) {
                 b = x
             }
             return [r, g, b]
-        }, shiftHue = function (rgb, degree) {//shifts [r,g,b] by a number of degrees
+        }, shiftHue             = function (rgb, degree) {//shifts [r,g,b] by a number of degrees
             var hsl = rgbToHSL(rgb); //convert to hue/saturation/luminosity to modify hue
             hsl[0] += degree; //increment the hue
             if (hsl[0] > 360) { //if it's too high
@@ -1165,7 +1270,7 @@ var generateRandomColors = function (number) {
         }, differenceRecursions = {//stores recursion data, so if all else fails we can use one of the hues already generated
             differences: [],//used to calculate the most distant hue
             values: []//used to store the actual colors
-        }, fixDifference = function (color) {//recursively asserts that the current color is distinctive
+        }, fixDifference        = function (color) {//recursively asserts that the current color is distinctive
             if (differenceRecursions.values.length > 23) {//first, check if this is the 25th recursion or higher. (can we try any more unique hues?)
                 //if so, get the biggest value in differences that we have and its corresponding value
                 var ret = differenceRecursions.values[differenceRecursions.differences.indexOf(Math.max.apply(null, differenceRecursions.differences))];
@@ -1174,32 +1279,32 @@ var generateRandomColors = function (number) {
             } //okay, so we still have some hues to try.
             var differences = []; //an array of the "difference" numbers we're going to generate.
             for (var i = 0; i < loadedColors.length; i++) { //for all the colors we've generated so far
-                var difference = loadedColors[i].map(function (value, index) { //for each value (red,green,blue)
+                var difference             = loadedColors[i].map(function (value, index) { //for each value (red,green,blue)
                         return Math.abs(value - color[index]) //replace it with the difference in that value between the two colors
-                    }), sumFunction = function (sum, value) { //function for adding up arrays
+                    }), sumFunction        = function (sum, value) { //function for adding up arrays
                         return sum + value
-                    }, sumDifference = difference.reduce(sumFunction), //add up the difference array
-                    loadedColorLuminosity = loadedColors[i].reduce(sumFunction), //get the total luminosity of the already generated color
+                    }, sumDifference       = difference.reduce(sumFunction), //add up the difference array
+                    loadedColorLuminosity  = loadedColors[i].reduce(sumFunction), //get the total luminosity of the already generated color
                     currentColorLuminosity = color.reduce(sumFunction), //get the total luminosity of the current color
-                    lumDifference = Math.abs(loadedColorLuminosity - currentColorLuminosity), //get the difference in luminosity between the two
+                    lumDifference          = Math.abs(loadedColorLuminosity - currentColorLuminosity), //get the difference in luminosity between the two
                     //how close are these two colors to being the same luminosity and saturation?
-                    differenceRange = Math.max.apply(null, difference) - Math.min.apply(null, difference),
-                    luminosityFactor = 50, //how much difference in luminosity the human eye should be able to detect easily
-                    rangeFactor = 75; //how much difference in luminosity and saturation the human eye should be able to dect easily
+                    differenceRange        = Math.max.apply(null, difference) - Math.min.apply(null, difference),
+                    luminosityFactor       = 50, //how much difference in luminosity the human eye should be able to detect easily
+                    rangeFactor            = 75; //how much difference in luminosity and saturation the human eye should be able to dect easily
                 if (luminosityFactor / (lumDifference + 1) * rangeFactor / (differenceRange + 1) > 1) { //if there's a problem with range or luminosity
                     //set the biggest difference for these colors to be whatever is most significant
                     differences.push(Math.min(differenceRange + lumDifference, sumDifference));
                 }
                 differences.push(sumDifference); //otherwise output the raw difference in RGB values
             }
-            var breakdownAt = 64, //if you're generating this many colors or more, don't try so hard to make unique hues, because you might fail.
-                breakdownFactor = 25, //how much should additional colors decrease the acceptable difference
-                shiftByDegrees = 15, //how many degrees of hue should we iterate through if this fails
+            var breakdownAt          = 64, //if you're generating this many colors or more, don't try so hard to make unique hues, because you might fail.
+                breakdownFactor      = 25, //how much should additional colors decrease the acceptable difference
+                shiftByDegrees       = 15, //how many degrees of hue should we iterate through if this fails
                 acceptableDifference = 250, //how much difference is unacceptable between colors
-                breakVal = loadedColors.length / number * (number - breakdownAt), //break down progressively (if it's the second color, you can still make it a unique hue)
-                totalDifference = Math.min.apply(null, differences); //get the color closest to the current color
+                breakVal             = loadedColors.length / number * (number - breakdownAt), //break down progressively (if it's the second color, you can still make it a unique hue)
+                totalDifference      = Math.min.apply(null, differences); //get the color closest to the current color
             if (totalDifference > acceptableDifference - (breakVal < 0 ? 0 : breakVal) * breakdownFactor) { //if the current color is acceptable
-                differenceRecursions = {differences: [], values: []} //reset the recursions object, because we're done
+                differenceRecursions = {differences: [], values: []};//reset the recursions object, because we're done
                 return color; //and return that color
             } //otherwise the current color is too much like another
             //start by adding this recursion's data into the recursions object
@@ -1207,31 +1312,31 @@ var generateRandomColors = function (number) {
             differenceRecursions.values.push(color);
             color = shiftHue(color, shiftByDegrees); //then increment the color's hue
             return fixDifference(color); //and try again
-        }, color = function () { //generate a random color
-            var scale = function (x) { //maps [0,1] to [300,510]
+        }, color                = function () { //generate a random color
+            var scale           = function (x) { //maps [0,1] to [300,510]
                     return x * 210 + 300 //(no brighter than #ff0 or #0ff or #f0f, but still pretty bright)
-                }, randVal = function () { //random value between 300 and 510
+                }, randVal      = function () { //random value between 300 and 510
                     return Math.floor(scale(Math.random()))
-                }, luminosity = randVal(), //random luminosity
-                red = randVal(), //random color values
-                green = randVal(), //these could be any random integer but we'll use the same function as for luminosity
-                blue = randVal(),
+                }, luminosity   = randVal(), //random luminosity
+                red             = randVal(), //random color values
+                green           = randVal(), //these could be any random integer but we'll use the same function as for luminosity
+                blue            = randVal(),
                 rescale, //we'll define this later
-                thisColor = [red, green, blue], //an array of the random values
+                thisColor       = [red, green, blue], //an array of the random values
                 /*
                  #ff0 and #9e0 are not the same colors, but they are on the same range of the spectrum, namely without blue.
                  Try to choose colors such that consecutive colors are on different ranges of the spectrum.
                  This shouldn't always happen, but it should happen more often then not.
                  Using a factor of 2.3, we'll only get the same range of spectrum 15% of the time.
                  */
-                valueToReduce = Math.floor(lastLoadedReduction + 1 + Math.random() * 2.3) % 3, //which value to reduce
+                valueToReduce   = Math.floor(lastLoadedReduction + 1 + Math.random() * 2.3) % 3, //which value to reduce
                 /*
                  Because 300 and 510 are fairly close in reference to zero,
-                 increase one of the remaining values by some arbitrary percent betweeen 0% and 100%,
+                 increase one of the remaining values by some arbitrary percent between 0% and 100%,
                  so that our remaining two values can be somewhat different.
                  */
                 valueToIncrease = Math.floor(valueToIncrease + 1 + Math.random() * 2) % 3, //which value to increase (not the one we reduced)
-                increaseBy = Math.random() + 1; //how much to increase it by
+                increaseBy      = Math.random() + 1; //how much to increase it by
             lastLoadedReduction = valueToReduce; //next time we make a color, try not to reduce the same one
             thisColor[valueToReduce] = Math.floor(thisColor[valueToReduce] / 16); //reduce one of the values
             thisColor[valueToIncrease] = Math.ceil(thisColor[valueToIncrease] * increaseBy); //increase one of the values
@@ -1267,3 +1372,19 @@ var generateRandomColors = function (number) {
         return "#" + hx(color[0]) + hx(color[1]) + hx(color[2]); //then return the hex code
     });
 };
+
+
+// window.onmousedown = function(e){
+//     var el = e.target;
+//     if (el.tagName.toLowerCase() === 'option' && el.parentNode.hasAttribute('multiple')) {
+//         e.preventDefault();
+//
+//         // toggle selection
+//         if (el.hasAttribute('selected')) el.removeAttribute('selected');
+//         else el.setAttribute('selected', '');
+//
+//         // hack to correct buggy behavior
+//         var select = el.parentNode.cloneNode(true);
+//         el.parentNode.parentNode.replaceChild(select, el.parentNode);
+//     }
+// };

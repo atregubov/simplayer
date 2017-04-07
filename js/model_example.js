@@ -496,6 +496,13 @@ oc_dictionary = [
 
 oc_model = [
     {
+        "oc_id": 1,
+        "name": "Team-1",
+        "children_ids": [
+            101, 102
+        ]
+    },
+    {
         "oc_id": 101,
         "name": "SE Team",
         "children_ids": [
@@ -514,15 +521,13 @@ oc_model = [
     {
         "oc_id": 111,
         "name": "Team-111",
-        "children_ids": [
-            121
-        ]
+        "children_ids": []
     },
     {
         "oc_id": 112,
         "name": "Team-112",
         "children_ids": [
-            121, 122
+            121
         ]
     },
     {
@@ -535,34 +540,16 @@ oc_model = [
     {
         "oc_id": 114,
         "name": "Team-114",
-        "children_ids": [
-            122
-        ]
+        "children_ids": []
     },
     {
         "oc_id": 121,
         "name": "Team-121",
-        "children_ids": [
-            131
-        ]
+        "children_ids": []
     },
     {
         "oc_id": 122,
         "name": "Team-122",
-        "children_ids": [
-            131
-        ]
-    },
-    {
-        "oc_id": 131,
-        "name": "Team-131",
-        "children_ids": [
-            141
-        ]
-    },
-    {
-        "oc_id": 141,
-        "name": "Team-141",
         "children_ids": []
     }
 ];
