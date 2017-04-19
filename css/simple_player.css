@@ -97,6 +97,18 @@ div#sidebar {
     margin-left: 40px;
 }
 
+#div_agg_indicators ul, #div_oc_indicators_chart ul {
+    padding-left: 0;
+    width: 90px;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow-y: hidden;
+}
+
+#div_agg_indicators li, #div_oc_indicators_chart li {
+    list-style: none;
+}
+
 .tab-content {
     color: white;
     /*background-color: #428bca;*/
@@ -112,8 +124,6 @@ svg .title {
 
 path {
     fill: none;
-    /*stroke: #42c1f7;*/
-    /*stroke: #2a7bf7;*/
     stroke: #267aa3;
     stroke-width: 2;
 }
@@ -121,6 +131,7 @@ path {
 .area {
     fill: #5bc0de;
     stroke-width: 0;
+    opacity: 0.1;
 }
 
 .axis path,
@@ -133,7 +144,7 @@ path {
 
 .point {
     stroke: #ffffff;
-    fill: #42c1f7;
+    /*fill: #42c1f7;*/
     stroke-width: 1;
 }
 
@@ -145,12 +156,10 @@ path {
     fill-opacity: 0.67;
 }
 
-
-
 /*
     Other Graphs
  */
 #other_graphs {
-    height: 400px;
+    /*height: 400px;*/
     /*    background-color: #d7d7d7;*/
 }

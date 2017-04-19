@@ -199,7 +199,7 @@ OCA_Chart.prototype.initiate = function () {
         .innerRadius(this.innerRadius * 1.01)
         .outerRadius(this.outerRadius);
 
-    //TODO: what if more than 20 groups?
+    // XXX: what if more than 20 groups?
     this.colors = d3.schemeCategory20.slice(0, this.number_of_groups);//generateRandomColors(n);
     this.colors = d3.scaleOrdinal().domain(d3.range(this.number_of_groups)).range(this.colors);
     this.opacityDefault = 0.8;
@@ -349,7 +349,10 @@ function Aggregating_Indicators(data, div_obj, agg_select, svg_obj) {
     this.total_frames = data.frames.length;
     this.agg_select = agg_select;
     this.svg_obj = svg_obj;
-    this.indicators = data.frame_dictionary;
+    this.indicators = data.frame_dictionary.map(function (d, i) {
+        d.index = i;
+        return d;
+    });
     this.current_indicator = this.indicators["0"].name;
     this.own_data = {};
     //noinspection JSDuplicatedDeclaration
@@ -369,6 +372,9 @@ function Aggregating_Indicators(data, div_obj, agg_select, svg_obj) {
     this.height = this.svg_obj.style("height");
     this.margin = {top: 15, right: 10, bottom: 20, left: 25};
 
+    // XXX: only 20 colors?
+    this.colors = d3.schemeCategory20;
+
     this.svg_obj.append("text").text("Aggregating Indicators Chart").attr("class", "title").attr("text-anchor", 'middle')
         .attr("transform", "translate(" + (parseInt(this.width) - this.margin.right ) / 2 + "," + (this.margin.top - 6) + ")");
 
@@ -382,16 +388,18 @@ Aggregating_Indicators.prototype = new Base_Chart();
 Aggregating_Indicators.prototype.initiate = function () {
     this.current_frame = 0;
     var target = this;
-    for (var i in this.indicators) {
-        //noinspection JSUnfilteredForInLoop
-        this.agg_select.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
-            return target.current_indicator === this.value;
-        });
-    }
+
+    var lis = this.agg_select.selectAll("li").data(this.indicators).enter().append("li");
+    lis.append("input").attr("type", "checkbox").attr("value", function (d) {
+        return d.name;
+    }).property("index", function (d) {
+        return d.index;
+    }).property("checked", true);
+    lis.append("label").text(function (d) {
+        return d.name;
+    });
 
     this.agg_select.on("change", function () {
-        //noinspection JSUnresolvedVariable
-        target.current_indicator = agg_select.options[agg_select.selectedIndex].value;
         target.setFrame(target.current_frame);
     });
 
@@ -401,6 +409,24 @@ Aggregating_Indicators.prototype.initiate = function () {
     // set the ranges
     var x = d3.scaleLinear().range([0, width]);
     var y = d3.scaleLinear().range([height, 0]);
+
+    this.svg_obj.append("g")
+        .attr("transform",
+            "translate(" + this.margin.left + "," + this.margin.top + ")");
+
+    var current_indicator = [];
+    var yData = [];
+    this.agg_select.selectAll("input").each(function () {
+        if (this.checked) current_indicator.push(this.value)
+    });
+    for (var i in current_indicator) {
+        yData = yData.concat(this.own_data[current_indicator[i]].map(function (d) {
+            return d[1];
+        }));
+    }
+
+    x.domain([0, this.total_frames - 1]);
+    y.domain([0, d3.max(yData)]);
 
     // define the line
     this.valueLine = d3.line()
@@ -418,15 +444,6 @@ Aggregating_Indicators.prototype.initiate = function () {
             return y(d[1]);
         });
 
-    this.svg_obj.append("g")
-        .attr("transform",
-            "translate(" + this.margin.left + "," + this.margin.top + ")");
-
-    x.domain([0, this.total_frames - 1]);
-    y.domain([0, d3.max(this.own_data[this.current_indicator], function (d) {
-        return d[1];
-    })]);
-
     // Add the X Axis
     this.svg_obj.append("g")
         .attr("transform", "translate(" + this.margin.left + "," + (height + this.margin.top) + ")")
@@ -438,24 +455,28 @@ Aggregating_Indicators.prototype.initiate = function () {
         .attr("class", "y axis")
         .call(d3.axisLeft(y));
 
-    // Add path
-    this.svg_obj.append("path")
-        .attr("class", "line")
-        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
-        .attr("d", this.valueLine(this.own_data[this.current_indicator].slice(0, this.current_frame + 1)));
+    for (i in current_indicator) {
+        // Add path
+        var indicator_name = current_indicator[i];
+        this.svg_obj.append("path")
+            .attr("class", "line " + indicator_name)
+            .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
+            .attr("d", this.valueLine(this.own_data[indicator_name].slice(0, this.current_frame + 1)))
+            .attr("stroke", this.colors[this.indicators[i].index]);
 
-    this.svg_obj.append("path")
-        .attr("class", "area")
-        .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
-        .attr("d", this.valueArea(this.own_data[this.current_indicator].slice(0, this.current_frame + 1)));
+        this.svg_obj.append("path")
+            .attr("class", "area " + indicator_name)
+            .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")")
+            .attr("d", this.valueArea(this.own_data[indicator_name].slice(0, this.current_frame + 1)));
 
-    this.svg_obj.selectAll("circle").data(this.own_data[this.current_indicator].slice(0, this.current_frame + 1))
-        .enter().append("circle").attr("r", "2.5").attr("cx", function (d) {
-        return x(d[0]);
-    }).attr("cy", function (d) {
-        return y(d[1]);
-    }).attr("transform", "translate(" + this.margin.left + ", " + this.margin.top + ")").attr("class", "point");
-
+        this.svg_obj.selectAll("circle.point." + indicator_name).data(this.own_data[indicator_name].slice(0, this.current_frame + 1))
+            .enter().append("circle").attr("r", "2.5").attr("cx", function (d) {
+            return x(d[0]);
+        }).attr("cy", function (d) {
+            return y(d[1]);
+        }).attr("transform", "translate(" + this.margin.left + ", " + this.margin.top + ")").attr("class", "point " + indicator_name)
+            .style("fill", this.colors[this.indicators[i].index]);
+    }
 
     this.x = x;
     this.y = y;
@@ -464,34 +485,50 @@ Aggregating_Indicators.prototype.initiate = function () {
 
 Aggregating_Indicators.prototype.setFrame = function (n) {
     if (n < 0 || n >= this.own_data.length) return false;
-    this.y.domain([0, d3.max(this.own_data[this.current_indicator], function (d) {
-        return d[1];
-    })]);
-    var newData = this.own_data[this.current_indicator].slice(0, n + 1);
 
+    var current_indicator = {};
+    this.agg_select.selectAll("input").each(function () {
+        current_indicator[this.value] = [this.checked, this.index];
+    });
+    var yData = [];
+    for (var i in current_indicator) {
+        if (current_indicator[i])
+            yData = yData.concat(this.own_data[i].map(function (d) {
+                return d[1];
+            }));
+    }
     var svg = this.svg_obj.transition();
 
+    this.y.domain([0, d3.max(yData)]);
     svg.select(".y.axis").duration(this.animation_duration).call(d3.axisLeft(this.y));
-    svg.select(".line")
-        .duration(this.animation_duration)
-        .attr("d", this.valueLine(newData));
-
-    svg.select(".area")
-        .duration(this.animation_duration)
-        .attr("d", this.valueArea(newData));
 
     var x = this.x;
     var y = this.y;
-    this.svg_obj.selectAll("circle").remove();
-    this.svg_obj.selectAll("circle").data(newData).enter().append("circle").attr("r", "2.5")
-        .attr("cx", function (d) {
-            return x(d[0]);
-        })
-        .attr("cy", function (d) {
-            return y(d[1]);
-        }).attr("transform", "translate(" + this.margin.left + ", " + this.margin.top + ")")
-        .attr("class", "point");
 
+    for (var indicator_name in current_indicator) {
+        var newData = current_indicator[indicator_name][0] ? this.own_data[indicator_name].slice(0, n + 1) : [];
+        svg.select(".line." + indicator_name)
+            .duration(this.animation_duration)
+            .attr("d", this.valueLine(newData))
+            .style("stroke", this.colors[this.indicators[current_indicator[indicator_name][1]].index]);
+
+        svg.select(".area." + indicator_name)
+            .duration(this.animation_duration)
+            .attr("d", this.valueArea(newData))
+            .style("fill", this.colors[this.indicators[current_indicator[indicator_name][1]].index]);
+
+        var circles = this.svg_obj.selectAll("circle." + indicator_name).data(newData);
+        circles.exit().remove();
+        circles.enter().append("circle").attr("r", "2.5")
+            .attr("cx", function (d) {
+                return x(d[0]);
+            })
+            .attr("cy", function (d) {
+                return y(d[1]);
+            }).attr("transform", "translate(" + this.margin.left + ", " + this.margin.top + ")")
+            .attr("class", "point " + indicator_name)
+            .style("fill", this.colors[this.indicators[current_indicator[indicator_name][1]].index]);
+    }
 
     this.current_frame = n;
     return true;
@@ -505,10 +542,13 @@ function OC_Indicators_Chart(data, div_obj, oc_selector, indicator_selector, svg
     Base_Chart.call(this, data, div_obj);
     this.current_frame = 0;
     this.total_frames = data.frames.length;
-    this.wi_selector = oc_selector;
+    this.oc_selector = oc_selector;
     this.indicator_selector = indicator_selector;
     this.svg_obj = svg_obj;
-    this.indicators = data.oc_dictionary;
+    this.indicators = data.oc_dictionary.map(function (d, i) {
+        d.index = i;
+        return d;
+    });
 
     this.width = svg_obj.style("width");
     this.height = svg_obj.style("height");
@@ -536,6 +576,9 @@ function OC_Indicators_Chart(data, div_obj, oc_selector, indicator_selector, svg
     this.current_indicator = 0;
     this.current_oc = Object.keys(this.own_data)[0];
 
+    // XXX: only 20 colors?
+    this.colors = d3.schemeCategory20;
+
     this.margin = {top: 15, right: 10, bottom: 20, left: 25};
     this.svg_obj.append("text").text(this.indicators[this.current_indicator].title).attr("class", "title").attr("text-anchor", 'middle')
         .attr("transform", "translate(" + (parseInt(this.width) - this.margin.right ) / 2 + "," + (this.margin.top - 6) + ")");
@@ -549,24 +592,36 @@ OC_Indicators_Chart.prototype = new Base_Chart();
 
 OC_Indicators_Chart.prototype.initiate = function () {
     var target = this;
-    for (var i in this.own_data) {
-        this.wi_selector.append("option").text(this.own_data[i].name).attr("value", this.own_data[i].id).property("selected", function () {
-            return (this.value === target.current_oc);
-        });
-    }
-    this.wi_selector.on("change", function () {
-        target.current_oc = this.options[this.selectedIndex].value;
+
+    var lis = this.oc_selector.selectAll("li").data(Object.values(this.own_data), function (d) {
+        return d;
+    }).enter().append("li");
+    lis.append("input").attr("type", "checkbox").attr("value", function (d, i) {
+        return d.name;
+    }).property("index", function (d, i) {
+        return i;
+    }).property("checked", true);
+    lis.append("label").text(function (d) {
+        return d.name;
+    });
+
+    this.oc_selector.on("change", function () {
         target.setFrame(target.current_frame);
     });
 
-    for (i in this.indicators) {
-        this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", (function () {
-            return i === target.current_indicator;
-        })());
-    }
+    var radio_label = this.indicator_selector.selectAll("div").data(this.indicators)
+        .enter().append("div").attr("class", "radio").append("label");
+    radio_label.append("input").attr("name", "oc_indicator_selector").attr("type", "radio").attr("value", function (d, i) {
+        return i;
+    }).property("checked", function (d, i) {
+        return target.current_indicator === i;
+    });
+    radio_label.append("text").text(function (d) {
+        return d.name;
+    });
+
     this.indicator_selector.on("change", function () {
-        // target.current_indicator = this.options[this.selectedIndex].value;
-        target.current_indicator = this.selectedIndex;
+        target.current_indicator = target.indicator_selector.select("input[name='oc_indicator_selector']:checked").node().value;
         target.setFrame(target.current_frame);
     });
 
@@ -716,7 +771,7 @@ function WI_Indicators_Chart(data, div_obj, wi_selector, indicator_selector, svg
     }
 }
 
-WI_Indicators_Chartprototype = new Base_Chart();
+WI_Indicators_Chart.prototype = new Base_Chart();
 
 WI_Indicators_Chart.prototype.initiate = function () {
     var target = this;
@@ -730,13 +785,21 @@ WI_Indicators_Chart.prototype.initiate = function () {
         target.setFrame(target.current_frame);
     });
 
-    for (i in this.indicators) {
-        this.indicator_selector.append("option").text(this.indicators[i].name).attr("value", this.indicators[i].name).property("selected", function () {
-            return parseInt(i) === target.current_indicator;
-        });
-    }
+    var labels_enter = this.indicator_selector.selectAll("div").data(this.indicators).enter()
+        .append("div").attr("class", "radio").append("label");
+    labels_enter.append("input").attr("type", "radio").attr("name", "wi_indicator_selector")
+        .attr("value", function (d, i) {
+            return i;
+        }).property("checked", function (d, i) {
+        return target.current_indicator === i;
+    });
+    labels_enter.append("text").text(function (d) {
+        return d.name;
+    });
+
+
     this.indicator_selector.on("change", function () {
-        target.current_indicator = this.selectedIndex;
+        target.current_indicator = target.indicator_selector.select("input[name='wi_indicator_selector']:checked").node().value;
         target.setFrame(target.current_frame);
     });
 
@@ -871,50 +934,38 @@ OrganizationRelationChart.prototype.initiate = function () {
         }
     }
 
-    var collect_structure = function (node) {
-        var cur_node = {"oc_id": node.oc_id, "name": node.name, "children": []};
-        for (var key in node.children_ids) {
-            cur_node.children.push(collect_structure(dict[node.children_ids[key]]));
-        }
-        return cur_node;
-    };
-    head_id = Object.keys(head_id);
-    // var treeData = collect_structure({"name": "root", "oc_id": "root", "children_ids": head_id});
-    var treeData = collect_structure(dict[head_id]);
-    // declares a tree layout and assigns the size
-    var treeMap = d3.tree().size([this.width - this.margin.left - this.margin.right, this.height - this.margin.top - this.margin.bottom]);
+    var layout = TreeLayout(this.height - this.margin.top - this.margin.bottom, this.width - this.margin.left - this.margin.right, this.own_data);
 
-    // assigns the data to a hierarchy using parent-child relationships
-    var nodes = d3.hierarchy(treeData);
-
-    // maps the node data to the tree layout
-    nodes = treeMap(nodes);
-
-    // appends a 'group' element to 'svg'
-    // moves the 'group' element to the top left margin
     g = this.svg_obj.append("g")
         .attr("transform",
             "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     // adds the links between the nodes
     var link = g.selectAll(".link")
-        .data(nodes.descendants().slice(1))
+    // .data(nodes.descendants().slice(1))
+        .data(layout.links)
         .enter().append("path")
         .attr("class", "link")
+        // .attr("d", function (d) {
+        //     return "M" + d.x + "," + d.y
+        //         + "C" + d.x + "," + (d.y + d.parent.y) / 2
+        //         + " " + d.parent.x + "," + (d.y + d.parent.y) / 2
+        //         + " " + d.parent.x + "," + d.parent.y;
+        // });
         .attr("d", function (d) {
-            return "M" + d.x + "," + d.y
-                + "C" + d.x + "," + (d.y + d.parent.y) / 2
-                + " " + d.parent.x + "," + (d.y + d.parent.y) / 2
-                + " " + d.parent.x + "," + d.parent.y;
+            return "M" + d.target.x + "," + d.target.y
+                + "C" + d.target.x + "," + (d.target.y + d.source.y) / 2
+                + " " + d.source.x + "," + (d.target.y + d.source.y) / 2
+                + " " + d.source.x + "," + d.source.y;
         });
-
     // adds each node as a group
     var node = g.selectAll(".node")
-        .data(nodes.descendants())
+    // .data(nodes.descendants())
+        .data(layout.nodes)
         .enter().append("g")
         .attr("class", function (d) {
             return "node" +
-                (d.children ? " node--internal" : " node--leaf");
+                (d.children_ids ? " node--internal" : " node--leaf");
         })
         .attr("transform", function (d) {
             return "translate(" + d.x + "," + d.y + ")";
@@ -928,19 +979,13 @@ OrganizationRelationChart.prototype.initiate = function () {
     node.append("text")
         .attr("dy", ".35em")
         .attr("y", function (d) {
-            return d.children ? -20 : 20;
+            return d.children_ids && d.children_ids.length >= 0 ? -20 : 20;
         })
         .style("text-anchor", "middle")
         .text(function (d) {
-            return d.data.name;
+            return d.name;
         });
 
-    // node.each(function(d){
-    //     if (d.name == "flare")
-    //         d3.select(this).remove();});
-    // link.each(function(d){
-    //     if (d.source.name == "flare")
-    //         d3.select(this).remove();});
     return true;
 };
 
@@ -948,6 +993,40 @@ OrganizationRelationChart.prototype.setFrame = function (n) {
     this.current_frame = n;
     return true;
 };
+
+function TreeLayout(height, width, nodes) {
+    var levels = [];
+    var dict = {};
+    for (var i in nodes) {
+        if (!levels[nodes[i].level])
+            levels[nodes[i].level] = [];
+        levels[nodes[i].level].push(nodes[i]);
+        dict[nodes[i].oc_id] = nodes[i];
+    }
+    var dy = height / (levels.length - 1);
+    var y = -dy;
+    for (var l in levels) {
+        y += dy;
+        var dx = width / (levels[l].length + 1);
+        var x = 0;
+        for (var n in levels[l]) {
+            levels[l][n].x = (x += dx);
+            levels[l][n].y = y;
+        }
+    }
+
+    var links = [];
+    for (n in nodes) {
+        for (l in nodes[n].children_ids) {
+            links.push({
+                source: {x: nodes[n].x, y: nodes[n].y},
+                target: {x: dict[nodes[n].children_ids[l]].x, y: dict[nodes[n].children_ids[l]].y}
+            });
+        }
+    }
+
+    return {nodes: nodes, links: links};
+}
 
 /*********** Util ***********/
 
@@ -1225,7 +1304,7 @@ var generateRandomColors = function (number) {
         lastLoadedReduction     = Math.floor(Math.random() * 3),//set a random value to be the first to decrease
         rgbToHSL                = function (rgb) {//converts [r,g,b] into [h,s,l]
             var r = rgb[0], g = rgb[1], b = rgb[2], cMax = Math.max(r, g, b), cMin = Math.min(r, g, b),
-                delta                                                              = cMax - cMin, l = (cMax + cMin) / 2, h = 0, s = 0;
+                delta                                                              = cMax - cMin, l                                             = (cMax + cMin) / 2, h = 0, s               = 0;
             if (delta === 0) h = 0; else if (cMax === r) h = 60 * ((g - b) / delta % 6); else if (cMax === g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
             if (delta === 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
             return [h, s, l]
@@ -1374,17 +1453,17 @@ var generateRandomColors = function (number) {
 };
 
 
-// window.onmousedown = function(e){
-//     var el = e.target;
-//     if (el.tagName.toLowerCase() === 'option' && el.parentNode.hasAttribute('multiple')) {
-//         e.preventDefault();
-//
-//         // toggle selection
-//         if (el.hasAttribute('selected')) el.removeAttribute('selected');
-//         else el.setAttribute('selected', '');
-//
-//         // hack to correct buggy behavior
-//         var select = el.parentNode.cloneNode(true);
-//         el.parentNode.parentNode.replaceChild(select, el.parentNode);
-//     }
-// };
+window.onmousedown = function (e) {
+    var el = e.target;
+    if (el.tagName.toLowerCase() === 'option' && el.parentNode.hasAttribute('multiple')) {
+        e.preventDefault();
+
+        // toggle selection
+        if (el.hasAttribute('selected')) el.removeAttribute('selected');
+        else el.setAttribute('selected', '');
+
+        // hack to correct buggy behavior
+        var select = el.parentNode.cloneNode(true);
+        el.parentNode.parentNode.replaceChild(select, el.parentNode);
+    }
+};

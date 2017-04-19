@@ -84,39 +84,10 @@
                         <div class="row" style="padding: 0px;margin: 0px;">
                             <div class="panel panel-default">
                                 <div class="panel-heading">Cumulative Flow Diagrams</div>
-                                <ul class="list-group">
-                                    <li class="list-group-item">
-                                        <div id="div_agg_indicators" style="height: 200px;display: flex;">
-                                            <select id="agg_select" multiple="multiple" size="10"
-                                            style="width: 80px; height:200px; float: left;">
-                                            </select>
-                                            <svg id="agg_chart" style="flex-grow: 1;"></svg>
-
-                                        </div>
-                                    </li>
-                                    <li class="list-group-item">
-                                        <div id="div_oc_indicators_chart" style="height: 200px;display: flex;">
-                                            <select id="oc_select" multiple="multiple" size="10"
-                                                    style="width: 80px; height:200px; float: left;">
-                                            </select>
-                                            <select id="oc_indicator_select"
-                                                    style="width: 90px; position: absolute; right: 5px;">
-                                            </select>
-                                            <svg id="oc_indicator_chart" style="flex-grow: 1;"></svg>
-                                        </div>
-                                    </li>
-                                    <li class="list-group-item">
-                                        <div id="div_wi_indicators" style="height: 200px;display: flex;">
-                                            <select id="wi_select" multiple="multiple" size="10"
-                                                    style="width: 80px; height:200px; float: left;">
-                                            </select>
-                                            <select id="wi_indicator_select"
-                                                    style="width: 90px; position: absolute; right: 5px;">
-                                            </select>
-                                            <svg id="wi_indicator_chart" style="flex-grow: 1;"></svg>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div id="div_agg_indicators" style="height: 200px;display: flex;">
+                                    <ul id="agg_select"></ul>
+                                    <svg id="agg_chart" style="flex-grow: 1;"></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -130,30 +101,40 @@
                                 </div>
                             </div>
                         </div>
-                        <!--<div class="container" style="width: auto;">-->
-                        <!--<ul class="nav nav-tabs" style="width: auto;">-->
-                        <!--<li><a href="#org_content" data-toggle="tab">Org</a></li>-->
-                        <!--<li><a href="#cop_info_content" data-toggle="tab">Cop Info</a></li>-->
-                        <!--<li><a href="#tab_reqt_info" data-toggle="tab">Reqt Info</a></li>-->
-                        <!--<li class="active"><a href="#tab_dsl" data-toggle="tab">Event</a></li>-->
-                        <!--</ul>-->
-                        <!--<div class="tab-content" style="width: auto;">-->
-                        <!--<div class="tab-pane" id="org_content">-->
-                        <!--&lt;!&ndash;org content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane" id="cop_info_content">-->
-                        <!--&lt;!&ndash;cop info content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane" id="tab_reqt_info">-->
-                        <!--&lt;!&ndash;reqt info content&ndash;&gt;-->
-                        <!--</div>-->
-                        <!--<div class="tab-pane active" id="tab_dsl">-->
-                        <!--<div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">-->
-                        <!--&lt;!&ndash;dsl content&ndash;&gt;-->
-                        <!--</div>-->
-
-                        <!--</div>-->
-                        <!--</div>-->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Organization Components Graphs</div>
+                            <div class="panel-body">
+                                <div id="div_oc_indicators_chart" style="height: 200px;display: flex;">
+                                    <ul id="oc_select"></ul>
+                                    <svg id="oc_indicator_chart" style="flex-grow: 1;"></svg>
+                                    <div id="oc_indicator_select">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Work Item Graphs</div>
+                            <div class="panel-body">
+                                <div id="div_wi_indicators" style="height: 200px;display: flex;">
+                                    <select id="wi_select" multiple="multiple" size="10"
+                                            style="width: 80px; height:200px; float: left;">
+                                    </select>
+                                    <svg id="wi_indicator_chart" style="flex-grow: 1;"></svg>
+                                    <div id="wi_indicator_select"></div>
+                                    <!--<select id="wi_indicator_select"-->
+                                    <!--style="width: 90px; position: absolute; right: 5px;">-->
+                                    <!--</select>-->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

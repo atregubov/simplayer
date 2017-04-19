@@ -498,6 +498,7 @@ oc_model = [
     {
         "oc_id": 1,
         "name": "Team-1",
+        "level": 0,
         "children_ids": [
             101, 102
         ]
@@ -505,6 +506,7 @@ oc_model = [
     {
         "oc_id": 101,
         "name": "SE Team",
+        "level": 1,
         "children_ids": [
             111,
             112
@@ -513,6 +515,7 @@ oc_model = [
     {
         "oc_id": 102,
         "name": "Security Team",
+        "level": 1,
         "children_ids": [
             113,
             114
@@ -521,11 +524,13 @@ oc_model = [
     {
         "oc_id": 111,
         "name": "Team-111",
+        "level": 2,
         "children_ids": []
     },
     {
         "oc_id": 112,
         "name": "Team-112",
+        "level": 2,
         "children_ids": [
             121
         ]
@@ -533,6 +538,7 @@ oc_model = [
     {
         "oc_id": 113,
         "name": "Team-113",
+        "level": 2,
         "children_ids": [
             122
         ]
@@ -540,16 +546,19 @@ oc_model = [
     {
         "oc_id": 114,
         "name": "Team-114",
+        "level": 2,
         "children_ids": []
     },
     {
         "oc_id": 121,
         "name": "Team-121",
+        "level": 3,
         "children_ids": []
     },
     {
         "oc_id": 122,
         "name": "Team-122",
+        "level": 3,
         "children_ids": []
     }
 ];
