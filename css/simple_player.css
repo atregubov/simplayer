@@ -8,6 +8,15 @@ body {
     padding-top: 55px;
 }
 
+.col-md-6 {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.panel {
+    margin-bottom: 10px;
+}
+
 div#sidebar {
     height: 900px;
     background: #85b2d3;
@@ -93,20 +102,30 @@ div#sidebar {
 
 #progresses > .task {
     height: 22px;
-    /*    left: 40px;*/
     margin-left: 40px;
 }
 
-#div_agg_indicators ul, #div_oc_indicators_chart ul {
+#div_agg_indicators ul, #div_oc_indicators_chart ul, #div_wi_indicators ul {
+    padding: 10px 0px 10px 0px;
     padding-left: 0;
-    width: 90px;
+    width: 100px;
     font-size: 14px;
     white-space: nowrap;
-    overflow-y: hidden;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
-#div_agg_indicators li, #div_oc_indicators_chart li {
+#div_agg_indicators li, #div_oc_indicators_chart ul, #div_wi_indicators li {
     list-style: none;
+}
+
+div.checkbox {
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+
+#wi_indicator_select, #oc_indicator_select {
+    margin-left: 10px;
 }
 
 .tab-content {
@@ -129,7 +148,7 @@ path {
 }
 
 .area {
-    fill: #5bc0de;
+    /*fill: #5bc0de;*/
     stroke-width: 0;
     opacity: 0.1;
 }

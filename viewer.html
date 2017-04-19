@@ -44,7 +44,7 @@
     <div class="col-md-2"></div>
     <div class="col-md-10" style="overflow-x: scroll">
         <div class="row">
-            <div class="col-md-3" style="margin: 0px; padding: 5px;">
+            <div class="col-md-3" style="margin: 0px; padding-top:5px;padding-right: 10px;">
                 <div class="panel panel-default">
                     <div class="panel-heading">Progress</div>
                     <div class="panel-body" style="padding: 5px 10px 5px 10px">
@@ -55,9 +55,8 @@
                 </div>
             </div>
             <div class="col-md-9" style="padding: 5px;">
-                <div class="row" style="margin: 0px;">
-
-                    <div id="OCA" class="col-md-6" style="padding: 0px;">
+                <div class="row">
+                    <div id="OCA" class="col-md-6" style="padding-right: 0px;">
                         <div class="panel panel-default">
                             <div class="panel-heading">Organizational Component Activity</div>
                             <div id="oca_div" class="panel-body">
@@ -67,11 +66,11 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6" style="padding: 5px;">
-                        <div id="oc_graph" class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
+                    <div class="col-md-6">
+                        <div id="oc_graph" class="panel panel-default">
                             <div class="panel-heading">Graphs</div>
                             <div class="panel-body">
-                                <svg id="oc_relation_svg" style="height: 450px; width: 350px;"></svg>
+                                <svg id="oc_relation_svg" style="height: 450px; width: 100%;"></svg>
                             </div>
                         </div>
 
@@ -79,32 +78,33 @@
                 </div>
 
 
-                <div id="other_diagrams" class="row" style="margin: 0px;">
-                    <div id="cumulative_flow_diagrams" class="col-md-6" style="padding: 0px;">
+                <div id="other_diagrams" class="row">
+                    <div id="cumulative_flow_diagrams" class="col-md-6" style="padding-right: 0px;">
                         <div class="row" style="padding: 0px;margin: 0px;">
                             <div class="panel panel-default">
                                 <div class="panel-heading">Cumulative Flow Diagrams</div>
-                                <div id="div_agg_indicators" style="height: 200px;display: flex;">
-                                    <ul id="agg_select"></ul>
-                                    <svg id="agg_chart" style="flex-grow: 1;"></svg>
+                                <div class="panel-body">
+                                    <div id="div_agg_indicators" style="height: 200px;display: flex;">
+                                        <ul id="agg_select"></ul>
+                                        <svg id="agg_chart" style="flex-grow: 1;"></svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div id="other_graphs" class="col-md-6" style="margin: 0px;padding: 0px 5px;">
-                        <div class="panel panel-default" style="margin-top: -5px; margin-left:5px;">
+                    <div id="other_graphs" class="col-md-6">
+                        <div class="panel panel-default">
                             <div class="panel-heading">Event</div>
                             <div class="panel-body">
                                 <div id="dsl_content" style="color: black; height:200px; overflow-y: scroll;">
-                                    <!--dsl content-->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-8 col-lg-8">
                         <div class="panel panel-default">
                             <div class="panel-heading">Organization Components Graphs</div>
                             <div class="panel-body">
@@ -119,19 +119,14 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-8">
+                    <div class="col-md-8 col-lg-8">
                         <div class="panel panel-default">
                             <div class="panel-heading">Work Item Graphs</div>
                             <div class="panel-body">
                                 <div id="div_wi_indicators" style="height: 200px;display: flex;">
-                                    <select id="wi_select" multiple="multiple" size="10"
-                                            style="width: 80px; height:200px; float: left;">
-                                    </select>
+                                    <ul id="wi_select"></ul>
                                     <svg id="wi_indicator_chart" style="flex-grow: 1;"></svg>
                                     <div id="wi_indicator_select"></div>
-                                    <!--<select id="wi_indicator_select"-->
-                                    <!--style="width: 90px; position: absolute; right: 5px;">-->
-                                    <!--</select>-->
                                 </div>
                             </div>
                         </div>
