@@ -602,9 +602,9 @@ OC_Indicators_Chart.prototype.initiate = function () {
     var target = this;
 
     // Setting Team Selector
-    var checkbox_div = this.oc_selector.selectAll("li").data(Object.values(this.own_data), function (d) {
-        return d;
-    }).enter().append("li").append("div").attr("class", "checkbox");
+    var checkbox_div = this.oc_selector.selectAll("li").data(Object.keys(this.own_data).map(function (key) {
+        return target.own_data[key];
+    })).enter().append("li").append("div").attr("class", "checkbox");
     var label = checkbox_div.append("label");
     label.append("input").attr("type", "checkbox").property("checked", true).attr("value", function (d) {
         return d.name
@@ -835,9 +835,9 @@ WI_Indicators_Chart.prototype.initiate = function () {
     var target = this;
 
     // Set WI Selector
-    var checkbox_div = this.wi_selector.selectAll("li").data(Object.values(this.own_data), function (d) {
-        return d;
-    }).enter().append("li").append("div").attr("class", "checkbox");
+    var checkbox_div = this.wi_selector.selectAll("li").data(Object.keys(this.own_data).map(function (key) {
+        return target.own_data[key];
+    })).enter().append("li").append("div").attr("class", "checkbox");
     var label = checkbox_div.append("label");
     label.append("input").attr("type", "checkbox").attr("value", function (d) {
         return d.id;
@@ -894,8 +894,8 @@ WI_Indicators_Chart.prototype.initiate = function () {
         });
 
     var cur_indicator = this.indicators[this.current_indicator].name;
-    var yData = [].concat.apply([], Object.values(this.own_data).map(function (d) {
-        return d[cur_indicator];
+    var yData = [].concat.apply([], Object.keys(this.own_data).map(function (key) {
+        return target.own_data[key][cur_indicator];
     }));
     var cur_wis = this.wi_selector.selectAll("input").nodes().map(function (d) {
         return d.value;
@@ -954,7 +954,10 @@ WI_Indicators_Chart.prototype.initiate = function () {
 };
 
 WI_Indicators_Chart.prototype.setFrame = function (n) {
-    if (n < 0 || n >= Object.values(this.own_data)[0][this.indicators[this.current_indicator].name].length) return false;
+    var target = this;
+    if (n < 0 || n >= Object.keys(this.own_data).map(function (key) {
+            return target.own_data[key];
+        })[0][this.indicators[this.current_indicator].name].length) return false;
 
     var cur_wis = this.wi_selector.selectAll("input").nodes().map(function (d) {
         return {id: d.value, checked: d.checked};
@@ -1396,7 +1399,7 @@ var generateRandomColors = function (number) {
         lastLoadedReduction     = Math.floor(Math.random() * 3),//set a random value to be the first to decrease
         rgbToHSL                = function (rgb) {//converts [r,g,b] into [h,s,l]
             var r = rgb[0], g = rgb[1], b = rgb[2], cMax = Math.max(r, g, b), cMin = Math.min(r, g, b),
-                delta                                                              = cMax - cMin, l                                             = (cMax + cMin) / 2, h                      = 0, s               = 0;
+                delta                                                              = cMax - cMin, l                                             = (cMax + cMin) / 2, h = 0, s               = 0;
             if (delta === 0) h = 0; else if (cMax === r) h = 60 * ((g - b) / delta % 6); else if (cMax === g) h = 60 * ((b - r) / delta + 2); else h = 60 * ((r - g) / delta + 4);
             if (delta === 0) s = 0; else s = delta / (1 - Math.abs(2 * l - 1));
             return [h, s, l]
